@@ -44,25 +44,9 @@ export const routes: Routes = [
         loadComponent: () => import('./onboarding/doctor-onboarding/doctor-list.component').then((m) => m.DoctorListComponent),
       },
       {
-        path: 'doctors/new',
-        canMatch: [roleGuard('CLINIC_ADMIN')],
-        loadComponent: () =>
-          import('./onboarding/doctor-onboarding/doctor-onboarding-form.component').then(
-            (m) => m.DoctorOnboardingFormComponent
-          ),
-      },
-      {
         path: 'patients',
         canMatch: [roleGuard('CLINIC_ADMIN')],
         loadComponent: () => import('./onboarding/patient-onboarding/patient-list.component').then((m) => m.PatientListComponent),
-      },
-      {
-        path: 'patients/new',
-        canMatch: [roleGuard('CLINIC_ADMIN')],
-        loadComponent: () =>
-          import('./onboarding/patient-onboarding/patient-onboarding-form.component').then(
-            (m) => m.PatientOnboardingFormComponent
-          ),
       },
       {
         path: 'my-clinics',

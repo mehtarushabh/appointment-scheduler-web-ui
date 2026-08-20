@@ -16,6 +16,16 @@ html {
     typography: Roboto,
     density: 0,
   ));
+
+  // Custom "success" semantic tokens (feature 004 toasts): Material 3 doesn't define a built-in
+  // success role the way it defines --mat-sys-error/-error-container/-on-error-container, so this
+  // extends the theme minimally with the same token shape, computed here (the only place raw
+  // color values may appear per stylelint's color-no-hex/declaration-property-value-disallowed-list
+  // rules, since a custom-property declaration isn't one of the restricted property names) and
+  // consumed everywhere else via var().
+  --app-sys-success: hsl(123 46% 34%);
+  --app-sys-success-container: hsl(137 39% 93%);
+  --app-sys-on-success-container: hsl(124 55% 24%);
 }
 
 body {
@@ -53,22 +63,24 @@ form {
 
 // Shared toast feedback (feature 004, NotificationService): success is light green with a dark
 // green border, failure is light red with a dark red border, applied to the MDC surface inside
-// MatSnackBar's container so every screen's toast looks identical bar its message text.
+// MatSnackBar's container so every screen's toast looks identical bar its message text. Success
+// uses the custom --app-sys-success* tokens defined above; failure reuses Material's own
+// --mat-sys-error/-error-container/-on-error-container system roles.
 .mat-mdc-snack-bar-container.app-toast-success .mdc-snackbar__surface {
-  background-color: #e6f4ea !important;
-  border: 2px solid #2e7d32;
+  background-color: var(--app-sys-success-container) !important;
+  border: 2px solid var(--app-sys-success);
 }
 
 .mat-mdc-snack-bar-container.app-toast-success .mdc-snackbar__label {
-  color: #1b5e20 !important;
+  color: var(--app-sys-on-success-container) !important;
 }
 
 .mat-mdc-snack-bar-container.app-toast-error .mdc-snackbar__surface {
-  background-color: #fdecea !important;
-  border: 2px solid #c62828;
+  background-color: var(--mat-sys-error-container) !important;
+  border: 2px solid var(--mat-sys-error);
 }
 
 .mat-mdc-snack-bar-container.app-toast-error .mdc-snackbar__label {
-  color: #b71c1c !important;
+  color: var(--mat-sys-on-error-container) !important;
 }
 /* You can add global styles to this file, and also import other style files */
