@@ -39,13 +39,5 @@
 
   <app-address-form [group]="form.controls.adminAddress" />
 
-  @if (errorMessage(); as message) {
-    <p role="alert">{{ message }}</p>
-  }
-
-  @if (submitted()) {
-    <p>Clinic onboarded successfully.</p>
-  }
-
   <button mat-flat-button type="submit" [disabled]="form.invalid">Onboard clinic</button>
 </form>

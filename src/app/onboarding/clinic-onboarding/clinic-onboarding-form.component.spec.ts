@@ -1,17 +1,26 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { ClinicOnboardingFormComponent } from './clinic-onboarding-form.component';
 import { ClinicOnboardingService } from './clinic-onboarding.service';
+import { NotificationService } from '../../shared/notification/notification.service';
 import { ClinicResponse } from '../../shared/models';
 
 describe('ClinicOnboardingFormComponent', () => {
   let onboardClinicSpy: ReturnType<typeof vi.fn>;
+  let notificationServiceStub: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     onboardClinicSpy = vi.fn();
+    notificationServiceStub = { success: vi.fn(), error: vi.fn() };
     TestBed.configureTestingModule({
       imports: [ClinicOnboardingFormComponent],
-      providers: [{ provide: ClinicOnboardingService, useValue: { onboardClinic: onboardClinicSpy } }],
+      providers: [
+        provideRouter([]),
+        { provide: ClinicOnboardingService, useValue: { onboardClinic: onboardClinicSpy } },
+        { provide: NotificationService, useValue: notificationServiceStub },
+      ],
     });
   });
 
@@ -34,24 +43,27 @@ describe('ClinicOnboardingFormComponent', () => {
     expect(onboardClinicSpy).not.toHaveBeenCalled();
   });
 
-  it('submits the onboarding request and marks success', () => {
+  it('shows a success toast naming the clinic and navigates to /home (FR-002, FR-008)', () => {
     onboardClinicSpy.mockReturnValue(of({} as ClinicResponse));
     const fixture = TestBed.createComponent(ClinicOnboardingFormComponent);
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigateByUrl');
     fillValidForm(fixture.componentInstance);
 
     fixture.componentInstance.submit();
 
     expect(onboardClinicSpy).toHaveBeenCalled();
-    expect(fixture.componentInstance.submitted()).toBe(true);
+    expect(notificationServiceStub.success).toHaveBeenCalledWith('Clinic Riverside Clinic onboarded successfully.');
+    expect(navigateSpy).toHaveBeenCalledWith('/home');
   });
 
-  it('surfaces a server error message on failure', () => {
+  it('shows a failure toast with the server error message on failure (FR-004)', () => {
     onboardClinicSpy.mockReturnValue(throwError(() => ({ error: { message: 'Registered ID already in use.' } })));
     const fixture = TestBed.createComponent(ClinicOnboardingFormComponent);
     fillValidForm(fixture.componentInstance);
 
     fixture.componentInstance.submit();
 
-    expect(fixture.componentInstance.errorMessage()).toBe('Registered ID already in use.');
+    expect(notificationServiceStub.error).toHaveBeenCalledWith('Registered ID already in use.');
   });
 });

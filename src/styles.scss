@@ -35,4 +35,40 @@ body {
   margin: 0;
   height: 100%;
 }
+
+// Inline form-submission error messages (`<p role="alert">`) use the shared theme's system error
+// color instead of the browser default, so they render consistently everywhere they appear.
+[role='alert'] {
+  color: var(--mat-sys-error);
+}
+
+// Every screen's form (login, change password, every onboarding form) is horizontally centered at
+// a comfortable reading width instead of left-aligned against the browser edge. Does not affect
+// the list/table screens, which use `<table>` rather than `<form>`.
+form {
+  max-width: 480px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+// Shared toast feedback (feature 004, NotificationService): success is light green with a dark
+// green border, failure is light red with a dark red border, applied to the MDC surface inside
+// MatSnackBar's container so every screen's toast looks identical bar its message text.
+.mat-mdc-snack-bar-container.app-toast-success .mdc-snackbar__surface {
+  background-color: #e6f4ea !important;
+  border: 2px solid #2e7d32;
+}
+
+.mat-mdc-snack-bar-container.app-toast-success .mdc-snackbar__label {
+  color: #1b5e20 !important;
+}
+
+.mat-mdc-snack-bar-container.app-toast-error .mdc-snackbar__surface {
+  background-color: #fdecea !important;
+  border: 2px solid #c62828;
+}
+
+.mat-mdc-snack-bar-container.app-toast-error .mdc-snackbar__label {
+  color: #b71c1c !important;
+}
 /* You can add global styles to this file, and also import other style files */

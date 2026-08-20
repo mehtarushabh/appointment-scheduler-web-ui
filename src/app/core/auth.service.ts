@@ -1,14 +1,24 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, map, switchMap, tap } from 'rxjs';
 
 export type UserRole = 'SYSTEM_ADMIN' | 'CLINIC_ADMIN' | 'DOCTOR' | 'PATIENT';
 
-export interface AuthSession {
+/** POST /auth/login's response — session/authorization essentials only (research.md #1, feature 003). */
+interface LoginResponse {
   token: string;
   role: UserRole;
   clinicId: string | null;
 }
+
+/** GET /me's response — display profile only, deliberately kept off LoginResponse (research.md #1). */
+interface MeResponse {
+  firstName: string;
+  lastName: string;
+  clinicName: string | null;
+}
+
+export interface AuthSession extends LoginResponse, MeResponse {}
 
 const SESSION_STORAGE_KEY = 'appointment-scheduler.session';
 
@@ -26,11 +36,22 @@ export class AuthService {
 
   constructor(private readonly http: HttpClient) {}
 
+  /**
+   * Chains POST /auth/login -> GET /me and merges both into one AuthSession (research.md #1,
+   * feature 003). GET /me is authenticated with the token this call just received, via an
+   * explicit header, rather than through the session signal (which isn't set until this whole
+   * chain completes) or the auth interceptor.
+   */
   login(email: string, password: string): Observable<AuthSession> {
-    return this.http.post<AuthSession>('/api/v1/auth/login', { email, password }).pipe(
-      tap((result) => {
-        this.session.set(result);
-        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(result));
+    return this.http.post<LoginResponse>('/api/v1/auth/login', { email, password }).pipe(
+      switchMap((login) =>
+        this.http
+          .get<MeResponse>('/api/v1/me', { headers: new HttpHeaders({ Authorization: `Bearer ${login.token}` }) })
+          .pipe(map((me) => ({ ...login, ...me })))
+      ),
+      tap((session) => {
+        this.session.set(session);
+        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
       })
     );
   }

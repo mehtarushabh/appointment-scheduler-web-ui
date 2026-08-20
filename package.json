@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "stylelint": "stylelint \"src/**/*.scss\""
   },
   "prettier": {
     "printWidth": 100,
@@ -40,6 +41,8 @@
     "@angular/cli": "^21.0.5",
     "@angular/compiler-cli": "^21.0.0",
     "jsdom": "^27.1.0",
+    "postcss-scss": "^4.0.9",
+    "stylelint": "^16.9.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
   }

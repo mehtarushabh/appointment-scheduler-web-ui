@@ -1,11 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '../../shared/address-form/address-form.component';
+import { NotificationService } from '../../shared/notification/notification.service';
 import { ClinicOnboardingService } from './clinic-onboarding.service';
 import { ClinicOnboardingRequest } from '../../shared/models';
 
@@ -27,6 +29,8 @@ import { ClinicOnboardingRequest } from '../../shared/models';
 export class ClinicOnboardingFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly clinicOnboardingService = inject(ClinicOnboardingService);
+  private readonly notification = inject(NotificationService);
+  private readonly router = inject(Router);
 
   readonly form = this.fb.group({
     name: ['', Validators.required],
@@ -39,14 +43,10 @@ export class ClinicOnboardingFormComponent {
     adminAddress: createAddressFormGroup(this.fb),
   });
 
-  readonly submitted = signal(false);
-  readonly errorMessage = signal<string | null>(null);
-
   submit(): void {
     if (this.form.invalid) {
       return;
     }
-    this.errorMessage.set(null);
     const value = this.form.getRawValue();
     const request: ClinicOnboardingRequest = {
       name: value.name!,
@@ -63,11 +63,12 @@ export class ClinicOnboardingFormComponent {
 
     this.clinicOnboardingService.onboardClinic(request).subscribe({
       next: () => {
-        this.submitted.set(true);
+        this.notification.success(`Clinic ${value.name} onboarded successfully.`);
         this.form.reset();
+        this.router.navigateByUrl('/home');
       },
       error: (err) => {
-        this.errorMessage.set(err?.error?.message ?? 'Failed to onboard clinic.');
+        this.notification.error(err?.error?.message ?? 'Failed to onboard clinic.');
       },
     });
   }

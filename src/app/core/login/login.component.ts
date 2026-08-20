@@ -35,7 +35,10 @@ export class LoginComponent {
     this.errorMessage.set(null);
     const { email, password } = this.form.getRawValue();
     this.auth.login(email!, password!).subscribe({
-      next: () => this.router.navigateByUrl('/'),
+      // Every role has a Home page now (feature 003); the `home` route dispatches to the right
+      // one for the logged-in role via roleGuard, so login itself no longer needs to know where
+      // each role belongs.
+      next: () => this.router.navigateByUrl('/home'),
       error: () => this.errorMessage.set('Invalid email or password.'),
     });
   }

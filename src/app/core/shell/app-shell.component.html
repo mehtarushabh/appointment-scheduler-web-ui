@@ -1,0 +1,32 @@
+<mat-toolbar color="primary" class="app-shell-toolbar">
+  <span class="app-shell-title">{{ title() }}</span>
+
+  @if (loggedIn()) {
+    <a
+      mat-button
+      routerLink="/home"
+      routerLinkActive
+      #homeActive="routerLinkActive"
+      [routerLinkActiveOptions]="{ exact: true }"
+      [color]="homeActive.isActive ? 'accent' : undefined"
+    >
+      Home
+    </a>
+
+    @for (link of navLinks(); track link.path) {
+      <a mat-button [routerLink]="link.path" routerLinkActive #linkActive="routerLinkActive" [color]="linkActive.isActive ? 'accent' : undefined">
+        {{ link.label }}
+      </a>
+    }
+
+    <span class="app-shell-spacer"></span>
+
+    <button mat-button [matMenuTriggerFor]="userMenu">{{ userName() }}</button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item disabled>Edit profile</button>
+      <button mat-menu-item (click)="logout()">Logout</button>
+    </mat-menu>
+  }
+</mat-toolbar>
+
+<router-outlet />
