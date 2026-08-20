@@ -1,0 +1,54 @@
+@if (step() === 'fields') {
+  <h2 mat-dialog-title>Add a new patient</h2>
+  <div mat-dialog-content>
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline">
+        <mat-label>First name</mat-label>
+        <input matInput formControlName="firstName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Last name</mat-label>
+        <input matInput formControlName="lastName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date of birth</mat-label>
+        <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" />
+        <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
+        <mat-datepicker #dobPicker />
+      </mat-form-field>
+
+      <app-address-form [group]="form.controls.address" />
+    </form>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button [disabled]="form.invalid" (click)="next()">Next</button>
+  </div>
+} @else {
+  <h2 mat-dialog-title>Confirm new patient</h2>
+  <div mat-dialog-content>
+    @let value = summary;
+    <p>{{ value.firstName }} {{ value.lastName }}</p>
+    <p>Email: {{ value.email }}</p>
+    <p>Date of birth: {{ value.dateOfBirth }}</p>
+    <p>
+      {{ value.address.addressLine1 }}
+      @if (value.address.addressLine2) {
+        , {{ value.address.addressLine2 }}
+      }
+      , {{ value.address.city }}, {{ value.address.state }} {{ value.address.zip }}, {{ value.address.country }}
+    </p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancel()">Cancel</button>
+    <button mat-button (click)="back()">Back</button>
+    <button mat-flat-button (click)="confirm()">Confirm</button>
+  </div>
+}
