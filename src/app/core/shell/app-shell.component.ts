@@ -14,11 +14,13 @@ interface NavLink {
 const ROLE_NAV_LINKS: Record<UserRole, NavLink[]> = {
   SYSTEM_ADMIN: [{ label: 'Register new clinic', path: '/clinics/new' }],
   CLINIC_ADMIN: [
+    { label: 'Clinic settings', path: '/clinic-settings' },
     { label: 'Doctors', path: '/doctors' },
     { label: 'Patients', path: '/patients' },
     { label: 'Appointments', path: '/appointments' },
   ],
   DOCTOR: [
+    { label: 'My schedule', path: '/my-schedule' },
     { label: 'Patients', path: '/doctor/patients' },
     { label: 'Appointments', path: '/appointments' },
   ],

@@ -68,13 +68,18 @@ describe('AppShellComponent', () => {
 
   it('shows the role-appropriate nav links for a Clinic Admin (FR-005)', () => {
     const { fixture } = setup(sessionFor({ role: 'CLINIC_ADMIN', clinicName: 'Riverside Clinic' }));
-    expect(fixture.componentInstance.navLinks().map((l) => l.label)).toEqual(['Doctors', 'Patients', 'Appointments']);
+    expect(fixture.componentInstance.navLinks().map((l) => l.label)).toEqual([
+      'Clinic settings',
+      'Doctors',
+      'Patients',
+      'Appointments',
+    ]);
   });
 
   it('shows the role-appropriate nav links for a Doctor (FR-005)', () => {
     const { fixture } = setup(sessionFor({ role: 'DOCTOR', clinicName: 'Riverside Clinic' }));
-    expect(fixture.componentInstance.navLinks().map((l) => l.label)).toEqual(['Patients', 'Appointments']);
-    expect(fixture.componentInstance.navLinks()[0].path).toBe('/doctor/patients');
+    expect(fixture.componentInstance.navLinks().map((l) => l.label)).toEqual(['My schedule', 'Patients', 'Appointments']);
+    expect(fixture.componentInstance.navLinks()[1].path).toBe('/doctor/patients');
   });
 
   it('shows the role-appropriate nav links for a Patient (FR-005)', () => {

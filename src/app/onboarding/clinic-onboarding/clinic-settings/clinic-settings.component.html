@@ -1,0 +1,56 @@
+<div class="header">
+  <h2>Clinic settings</h2>
+</div>
+
+<section>
+  <h3>Profile</h3>
+  <form [formGroup]="profileForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Clinic name</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Registered ID</mat-label>
+      <input matInput [value]="registeredId()" readonly disabled />
+    </mat-form-field>
+
+    <app-address-form [group]="profileForm.controls.address" />
+  </form>
+  <button mat-flat-button [disabled]="profileForm.invalid" (click)="saveProfile()">Save profile</button>
+</section>
+
+<section>
+  <h3>Working hours</h3>
+  <form [formGroup]="hoursForm">
+    <table>
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>Open</th>
+          <th>Start time</th>
+          <th>End time</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (day of dayGroups; track day) {
+          <tr [formGroup]="day">
+            <td>{{ day.getRawValue().dayOfWeek }}</td>
+            <td><mat-checkbox formControlName="isOpen" /></td>
+            <td>
+              <mat-form-field appearance="outline">
+                <input matInput type="time" formControlName="startTime" />
+              </mat-form-field>
+            </td>
+            <td>
+              <mat-form-field appearance="outline">
+                <input matInput type="time" formControlName="endTime" />
+              </mat-form-field>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </form>
+  <button mat-flat-button (click)="saveHours()">Save working hours</button>
+</section>

@@ -1,0 +1,43 @@
+@if (step() === 'fields') {
+  <h2 mat-dialog-title>Add leave</h2>
+  <div mat-dialog-content>
+    <mat-calendar [selected]="selectedDate()" (selectedChange)="selectDate($event)" />
+
+    <form [formGroup]="form">
+      <mat-checkbox formControlName="fullDay">Full day</mat-checkbox>
+
+      @if (showTimeRange()) {
+        <div class="time-range">
+          <mat-form-field appearance="outline">
+            <mat-label>Start time</mat-label>
+            <input matInput type="time" step="1800" formControlName="startTime" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>End time</mat-label>
+            <input matInput type="time" step="1800" formControlName="endTime" />
+          </mat-form-field>
+        </div>
+      }
+    </form>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="abandon()">Cancel</button>
+    <button mat-flat-button [disabled]="!selectedDate() || form.invalid" (click)="confirm()">Add leave</button>
+  </div>
+} @else {
+  <h2 mat-dialog-title>This leave conflicts with existing appointments</h2>
+  <div mat-dialog-content>
+    <p>The following appointments are SCHEDULED during this leave window:</p>
+    <ul>
+      @for (appointment of conflictingAppointments(); track appointment.id) {
+        <li>{{ appointment.patientName }} — {{ appointment.date }} at {{ appointment.startTime }}</li>
+      }
+    </ul>
+    <p>Choose whether to cancel all of these appointments and add the leave, or abandon the leave.</p>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="abandon()">Abandon the leave</button>
+    <button mat-flat-button (click)="cancelAllAndAdd()">Cancel all conflicting appointments and add the leave</button>
+  </div>
+}

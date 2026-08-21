@@ -62,6 +62,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'clinic-settings',
+        canMatch: [roleGuard('CLINIC_ADMIN')],
+        loadComponent: () =>
+          import('./onboarding/clinic-onboarding/clinic-settings/clinic-settings.component').then(
+            (m) => m.ClinicSettingsComponent
+          ),
+      },
+      {
+        path: 'my-schedule',
+        canMatch: [roleGuard('DOCTOR')],
+        loadComponent: () =>
+          import('./scheduling/doctor-schedule/doctor-schedule.component').then((m) => m.DoctorScheduleComponent),
+      },
+      {
         path: 'clinic-admins/new',
         canMatch: [roleGuard('CLINIC_ADMIN')],
         loadComponent: () =>
@@ -76,17 +90,30 @@ export const routes: Routes = [
           import('./core/change-password/change-password.component').then((m) => m.ChangePasswordComponent),
       },
       {
-        // Not-yet-built destinations share one placeholder component (research.md #6).
         path: 'appointments',
-        canMatch: [authGuard],
+        canMatch: [roleGuard('CLINIC_ADMIN')],
+        loadComponent: () =>
+          import('./scheduling/appointments/appointments-list.component').then((m) => m.AppointmentsListComponent),
+      },
+      {
+        path: 'appointments',
+        canMatch: [roleGuard('DOCTOR')],
+        loadComponent: () =>
+          import('./scheduling/appointments/appointments-list.component').then((m) => m.AppointmentsListComponent),
+      },
+      {
+        // A Patient never manages appointments directly here — cancellation isn't available to
+        // Patients at all (FR-025, spec Assumptions); this placeholder stays as-is.
+        path: 'appointments',
+        canMatch: [roleGuard('PATIENT')],
         loadComponent: () => import('./shared/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
         data: { featureName: 'Appointments' },
       },
       {
         path: 'schedule-appointment',
-        canMatch: [authGuard],
-        loadComponent: () => import('./shared/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-        data: { featureName: 'Schedule appointment' },
+        canMatch: [roleGuard('PATIENT')],
+        loadComponent: () =>
+          import('./scheduling/book-appointment/book-appointment.component').then((m) => m.BookAppointmentComponent),
       },
       {
         // A Doctor's own placeholder, kept distinct from the real Clinic-Admin-only `patients`
