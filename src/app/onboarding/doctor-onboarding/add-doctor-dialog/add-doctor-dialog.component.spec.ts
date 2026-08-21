@@ -4,7 +4,6 @@ import { of, throwError } from 'rxjs';
 import { AddDoctorDialogComponent } from './add-doctor-dialog.component';
 import { DoctorOnboardingService } from '../doctor-onboarding.service';
 import { NotificationService } from '../../../shared/notification/notification.service';
-import { AuthService } from '../../../core/auth.service';
 import { UserResponse } from '../../../shared/models';
 
 describe('AddDoctorDialogComponent', () => {
@@ -21,7 +20,6 @@ describe('AddDoctorDialogComponent', () => {
       providers: [
         { provide: DoctorOnboardingService, useValue: { onboardDoctor: onboardDoctorSpy } },
         { provide: NotificationService, useValue: notificationServiceStub },
-        { provide: AuthService, useValue: { currentUser: () => ({ clinicId: 'clinic-1', role: 'CLINIC_ADMIN', token: 't' }) } },
         { provide: MatDialogRef, useValue: dialogRefStub },
       ],
     });
@@ -88,7 +86,7 @@ describe('AddDoctorDialogComponent', () => {
 
     fixture.componentInstance.confirm();
 
-    expect(onboardDoctorSpy).toHaveBeenCalledWith('clinic-1', expect.objectContaining({ specialty: 'Cardiology' }));
+    expect(onboardDoctorSpy).toHaveBeenCalledWith(expect.objectContaining({ specialty: 'Cardiology' }));
     expect(notificationServiceStub.success).toHaveBeenCalledWith('Doctor Dana Doc onboarded successfully.');
     expect(dialogRefStub.close).toHaveBeenCalledWith(created);
   });

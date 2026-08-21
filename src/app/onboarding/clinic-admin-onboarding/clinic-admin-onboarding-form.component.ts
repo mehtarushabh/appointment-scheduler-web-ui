@@ -9,7 +9,6 @@ import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '
 import { NotificationService } from '../../shared/notification/notification.service';
 import { ClinicAdminOnboardingService } from './clinic-admin-onboarding.service';
 import { UserOnboardingRequest } from '../../shared/models';
-import { AuthService } from '../../core/auth.service';
 
 /** Clinic Admin onboards another Clinic Admin for the same clinic (User Story 4). */
 @Component({
@@ -30,7 +29,6 @@ export class ClinicAdminOnboardingFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly clinicAdminOnboardingService = inject(ClinicAdminOnboardingService);
   private readonly notification = inject(NotificationService);
-  private readonly auth = inject(AuthService);
 
   readonly form = this.fb.group({
     firstName: ['', Validators.required],
@@ -41,8 +39,7 @@ export class ClinicAdminOnboardingFormComponent {
   });
 
   submit(): void {
-    const clinicId = this.auth.currentUser()?.clinicId;
-    if (this.form.invalid || !clinicId) {
+    if (this.form.invalid) {
       return;
     }
     const value = this.form.getRawValue();
@@ -54,7 +51,7 @@ export class ClinicAdminOnboardingFormComponent {
       address: value.address as AddressFormValue,
     };
 
-    this.clinicAdminOnboardingService.onboardClinicAdmin(clinicId, request).subscribe({
+    this.clinicAdminOnboardingService.onboardClinicAdmin(request).subscribe({
       next: () => {
         this.notification.success(`Clinic admin ${value.firstName} ${value.lastName} onboarded successfully.`);
         this.form.reset();

@@ -7,7 +7,7 @@ import { UserOnboardingRequest, UserResponse } from '../../shared/models';
 export class ClinicAdminOnboardingService {
   private readonly http = inject(HttpClient);
 
-  onboardClinicAdmin(clinicId: string, request: UserOnboardingRequest): Observable<UserResponse> {
-    return this.http.post<UserResponse>(`/api/v1/clinics/${clinicId}/clinic-admins`, request);
+  onboardClinicAdmin(request: UserOnboardingRequest): Observable<UserResponse> {
+    return this.http.post<UserResponse>('/api/v1/clinics/me/clinic-admins', request);
   }
 }

@@ -35,8 +35,8 @@ export class AppointmentService {
     return this.http.get<AppointmentResponse[]>('/api/v1/me/appointments');
   }
 
-  listClinicAppointments(clinicId: string): Observable<AppointmentResponse[]> {
-    return this.http.get<AppointmentResponse[]>(`/api/v1/clinics/${clinicId}/appointments`);
+  listClinicAppointments(): Observable<AppointmentResponse[]> {
+    return this.http.get<AppointmentResponse[]>('/api/v1/clinics/me/appointments');
   }
 
   cancelAppointment(appointmentId: string): Observable<AppointmentResponse> {

@@ -48,7 +48,7 @@ export class ClinicSettingsComponent implements OnInit {
     if (!clinicId) {
       return;
     }
-    this.clinicSettingsService.getProfile(clinicId).subscribe((clinic) => {
+    this.clinicSettingsService.getProfile().subscribe((clinic) => {
       this.registeredId.set(clinic.registeredId);
       this.profileForm.patchValue({ name: clinic.name, address: clinic.address });
     });
@@ -56,22 +56,17 @@ export class ClinicSettingsComponent implements OnInit {
   }
 
   saveProfile(): void {
-    const clinicId = this.auth.currentUser()?.clinicId;
-    if (this.profileForm.invalid || !clinicId) {
+    if (this.profileForm.invalid) {
       return;
     }
     const value = this.profileForm.getRawValue();
-    this.clinicSettingsService.updateProfile(clinicId, { name: value.name!, address: value.address as AddressFormValue }).subscribe({
+    this.clinicSettingsService.updateProfile({ name: value.name!, address: value.address as AddressFormValue }).subscribe({
       next: () => this.notification.success('Clinic profile updated.'),
       error: (err) => this.notification.error(err?.error?.message ?? 'Failed to update clinic profile.'),
     });
   }
 
   saveHours(): void {
-    const clinicId = this.auth.currentUser()?.clinicId;
-    if (!clinicId) {
-      return;
-    }
     const days: WorkingHoursEntry[] = this.dayGroups.map((group) => {
       const value = group.getRawValue();
       return {
@@ -82,7 +77,7 @@ export class ClinicSettingsComponent implements OnInit {
       };
     });
 
-    this.clinicSettingsService.updateWorkingHours(clinicId, { days }).subscribe({
+    this.clinicSettingsService.updateWorkingHours({ days }).subscribe({
       next: (hours) => {
         this.applyHours(hours);
         this.notification.success('Working hours updated.');

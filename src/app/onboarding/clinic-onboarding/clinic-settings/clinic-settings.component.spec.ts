@@ -64,7 +64,7 @@ describe('ClinicSettingsComponent', () => {
   it('loads and displays the clinic profile, read-only Registered ID, and 7-day working-hours table on init', () => {
     const fixture = setup();
 
-    expect(getProfileSpy).toHaveBeenCalledWith('clinic-1');
+    expect(getProfileSpy).toHaveBeenCalled();
     expect(getWorkingHoursSpy).toHaveBeenCalledWith('clinic-1');
     expect(fixture.componentInstance.registeredId()).toBe('REG-1');
     expect(fixture.componentInstance.profileForm.getRawValue().name).toBe('Metropolis Clinic');
@@ -90,7 +90,7 @@ describe('ClinicSettingsComponent', () => {
 
     fixture.componentInstance.saveProfile();
 
-    expect(updateProfileSpy).toHaveBeenCalledWith('clinic-1', expect.objectContaining({ name: 'Renamed Clinic' }));
+    expect(updateProfileSpy).toHaveBeenCalledWith(expect.objectContaining({ name: 'Renamed Clinic' }));
     expect(notificationServiceStub.success).toHaveBeenCalled();
   });
 
@@ -102,7 +102,6 @@ describe('ClinicSettingsComponent', () => {
     fixture.componentInstance.saveHours();
 
     expect(updateWorkingHoursSpy).toHaveBeenCalledWith(
-      'clinic-1',
       expect.objectContaining({
         days: expect.arrayContaining([expect.objectContaining({ dayOfWeek: 'TUESDAY', startTime: '09:00', endTime: '18:00' })]),
       })

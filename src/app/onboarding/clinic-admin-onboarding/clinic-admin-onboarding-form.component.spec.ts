@@ -3,7 +3,6 @@ import { of, throwError } from 'rxjs';
 import { ClinicAdminOnboardingFormComponent } from './clinic-admin-onboarding-form.component';
 import { ClinicAdminOnboardingService } from './clinic-admin-onboarding.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { AuthService } from '../../core/auth.service';
 import { UserResponse } from '../../shared/models';
 
 describe('ClinicAdminOnboardingFormComponent', () => {
@@ -18,7 +17,6 @@ describe('ClinicAdminOnboardingFormComponent', () => {
       providers: [
         { provide: ClinicAdminOnboardingService, useValue: { onboardClinicAdmin: onboardClinicAdminSpy } },
         { provide: NotificationService, useValue: notificationServiceStub },
-        { provide: AuthService, useValue: { currentUser: () => ({ clinicId: 'clinic-1', role: 'CLINIC_ADMIN', token: 't' }) } },
       ],
     });
   });
@@ -46,7 +44,7 @@ describe('ClinicAdminOnboardingFormComponent', () => {
 
     fixture.componentInstance.submit();
 
-    expect(onboardClinicAdminSpy).toHaveBeenCalledWith('clinic-1', expect.objectContaining({ email: 'second@example.com' }));
+    expect(onboardClinicAdminSpy).toHaveBeenCalledWith(expect.objectContaining({ email: 'second@example.com' }));
     expect(notificationServiceStub.success).toHaveBeenCalledWith('Clinic admin Second Admin onboarded successfully.');
   });
 

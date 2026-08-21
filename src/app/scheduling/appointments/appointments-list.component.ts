@@ -32,8 +32,8 @@ export class AppointmentsListComponent implements OnInit {
     if (!user) {
       return;
     }
-    if (user.role === 'CLINIC_ADMIN' && user.clinicId) {
-      this.appointmentService.listClinicAppointments(user.clinicId).subscribe((appointments) => this.appointments.set(appointments));
+    if (user.role === 'CLINIC_ADMIN') {
+      this.appointmentService.listClinicAppointments().subscribe((appointments) => this.appointments.set(appointments));
     } else if (user.role === 'DOCTOR') {
       this.appointmentService.listMyAppointments().subscribe((appointments) => this.appointments.set(appointments));
     }

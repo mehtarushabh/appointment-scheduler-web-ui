@@ -4,7 +4,6 @@ import { of } from 'rxjs';
 import { DoctorListComponent } from './doctor-list.component';
 import { DoctorOnboardingService } from './doctor-onboarding.service';
 import { AddDoctorDialogComponent } from './add-doctor-dialog/add-doctor-dialog.component';
-import { AuthService } from '../../core/auth.service';
 import { UserResponse } from '../../shared/models';
 
 function doctor(overrides: Partial<UserResponse>): UserResponse {
@@ -30,7 +29,6 @@ describe('DoctorListComponent', () => {
       imports: [DoctorListComponent],
       providers: [
         { provide: DoctorOnboardingService, useValue: { listDoctors: listDoctorsSpy } },
-        { provide: AuthService, useValue: { currentUser: () => ({ clinicId: 'clinic-1', role: 'CLINIC_ADMIN', token: 't' }) } },
         { provide: MatDialog, useValue: { open: dialogOpenSpy } },
       ],
     });

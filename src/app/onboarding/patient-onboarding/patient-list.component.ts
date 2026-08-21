@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { PatientOnboardingService } from './patient-onboarding.service';
 import { AddPatientDialogComponent } from './add-patient-dialog/add-patient-dialog.component';
 import { UserResponse } from '../../shared/models';
-import { AuthService } from '../../core/auth.service';
 
 /**
  * Clinic Admin's table of their own clinic's patients (Feature 001 US3; row-expansion and the
@@ -20,7 +19,6 @@ import { AuthService } from '../../core/auth.service';
 })
 export class PatientListComponent implements OnInit {
   private readonly patientOnboardingService = inject(PatientOnboardingService);
-  private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
 
   readonly patients = signal<UserResponse[]>([]);
@@ -29,11 +27,7 @@ export class PatientListComponent implements OnInit {
   private readonly expandedIds = signal<ReadonlySet<string>>(new Set());
 
   ngOnInit(): void {
-    const clinicId = this.auth.currentUser()?.clinicId;
-    if (!clinicId) {
-      return;
-    }
-    this.patientOnboardingService.listPatients(clinicId).subscribe((patients) => this.patients.set(patients));
+    this.patientOnboardingService.listPatients().subscribe((patients) => this.patients.set(patients));
   }
 
   isExpanded(patient: UserResponse): boolean {

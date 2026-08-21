@@ -4,7 +4,6 @@ import { of } from 'rxjs';
 import { PatientListComponent } from './patient-list.component';
 import { PatientOnboardingService } from './patient-onboarding.service';
 import { AddPatientDialogComponent } from './add-patient-dialog/add-patient-dialog.component';
-import { AuthService } from '../../core/auth.service';
 import { UserResponse } from '../../shared/models';
 
 function patient(overrides: Partial<UserResponse>): UserResponse {
@@ -30,7 +29,6 @@ describe('PatientListComponent', () => {
       imports: [PatientListComponent],
       providers: [
         { provide: PatientOnboardingService, useValue: { listPatients: listPatientsSpy } },
-        { provide: AuthService, useValue: { currentUser: () => ({ clinicId: 'clinic-1', role: 'CLINIC_ADMIN', token: 't' }) } },
         { provide: MatDialog, useValue: { open: dialogOpenSpy } },
       ],
     });
@@ -39,10 +37,10 @@ describe('PatientListComponent', () => {
     return { fixture, listPatientsSpy, dialogOpenSpy };
   }
 
-  it('loads only the current clinic patients on init', () => {
+  it('loads the current clinic patients on init', () => {
     const { fixture, listPatientsSpy } = setup([patient({ id: '1' })]);
 
-    expect(listPatientsSpy).toHaveBeenCalledWith('clinic-1');
+    expect(listPatientsSpy).toHaveBeenCalled();
     expect(fixture.componentInstance.patients().length).toBe(1);
   });
 

@@ -19,8 +19,8 @@ describe('ClinicSettingsService', () => {
   afterEach(() => httpMock.verify());
 
   it('gets a clinic profile', () => {
-    service.getProfile('clinic-1').subscribe();
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1');
+    service.getProfile().subscribe();
+    const req = httpMock.expectOne('/api/v1/clinics/me');
     expect(req.request.method).toBe('GET');
     req.flush({});
   });
@@ -31,9 +31,9 @@ describe('ClinicSettingsService', () => {
       address: { addressLine1: '1 Main St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
     };
 
-    service.updateProfile('clinic-1', request).subscribe();
+    service.updateProfile(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1');
+    const req = httpMock.expectOne('/api/v1/clinics/me');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(request);
     req.flush({});
@@ -51,9 +51,9 @@ describe('ClinicSettingsService', () => {
       days: [{ dayOfWeek: 'MONDAY', isOpen: true, startTime: '08:00', endTime: '17:00' }],
     };
 
-    service.updateWorkingHours('clinic-1', request).subscribe();
+    service.updateWorkingHours(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1/working-hours');
+    const req = httpMock.expectOne('/api/v1/clinics/me/working-hours');
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(request);
     req.flush([]);

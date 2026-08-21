@@ -7,19 +7,20 @@ import { ClinicProfileUpdateRequest, ClinicResponse, WorkingHoursEntry, WorkingH
 export class ClinicSettingsService {
   private readonly http = inject(HttpClient);
 
-  getProfile(clinicId: string): Observable<ClinicResponse> {
-    return this.http.get<ClinicResponse>(`/api/v1/clinics/${clinicId}`);
+  getProfile(): Observable<ClinicResponse> {
+    return this.http.get<ClinicResponse>('/api/v1/clinics/me');
   }
 
-  updateProfile(clinicId: string, request: ClinicProfileUpdateRequest): Observable<ClinicResponse> {
-    return this.http.patch<ClinicResponse>(`/api/v1/clinics/${clinicId}`, request);
+  updateProfile(request: ClinicProfileUpdateRequest): Observable<ClinicResponse> {
+    return this.http.patch<ClinicResponse>('/api/v1/clinics/me', request);
   }
 
+  /** Also reachable by a Patient associated with this clinic, so this one keeps clinicId in the path. */
   getWorkingHours(clinicId: string): Observable<WorkingHoursEntry[]> {
     return this.http.get<WorkingHoursEntry[]>(`/api/v1/clinics/${clinicId}/working-hours`);
   }
 
-  updateWorkingHours(clinicId: string, request: WorkingHoursUpdateRequest): Observable<WorkingHoursEntry[]> {
-    return this.http.put<WorkingHoursEntry[]>(`/api/v1/clinics/${clinicId}/working-hours`, request);
+  updateWorkingHours(request: WorkingHoursUpdateRequest): Observable<WorkingHoursEntry[]> {
+    return this.http.put<WorkingHoursEntry[]>('/api/v1/clinics/me/working-hours', request);
   }
 }

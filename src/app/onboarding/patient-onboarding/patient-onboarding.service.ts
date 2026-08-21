@@ -8,12 +8,12 @@ export class PatientOnboardingService {
   private readonly http = inject(HttpClient);
 
   /** Creates a new Patient, or links an existing one (matched by email) to this clinic (FR-007). */
-  onboardOrLinkPatient(clinicId: string, request: UserOnboardingRequest): Observable<UserResponse> {
-    return this.http.post<UserResponse>(`/api/v1/clinics/${clinicId}/patients`, request);
+  onboardOrLinkPatient(request: UserOnboardingRequest): Observable<UserResponse> {
+    return this.http.post<UserResponse>('/api/v1/clinics/me/patients', request);
   }
 
-  listPatients(clinicId: string): Observable<UserResponse[]> {
-    return this.http.get<UserResponse[]>(`/api/v1/clinics/${clinicId}/patients`);
+  listPatients(): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>('/api/v1/clinics/me/patients');
   }
 
   /** The clinics the current authenticated Patient is associated with (FR-013). */

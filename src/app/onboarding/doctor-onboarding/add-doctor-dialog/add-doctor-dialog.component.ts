@@ -10,7 +10,6 @@ import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { DoctorOnboardingService } from '../doctor-onboarding.service';
 import { DoctorOnboardingRequest, UserResponse } from '../../../shared/models';
-import { AuthService } from '../../../core/auth.service';
 
 /**
  * Two-step "Add a new doctor" pop-up (Feature 005 US2): a fields step, then a read-only confirm
@@ -41,7 +40,6 @@ export class AddDoctorDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly doctorOnboardingService = inject(DoctorOnboardingService);
   private readonly notification = inject(NotificationService);
-  private readonly auth = inject(AuthService);
   private readonly dialogRef = inject(MatDialogRef<AddDoctorDialogComponent, UserResponse>);
 
   readonly step = signal<'fields' | 'confirm'>('fields');
@@ -77,8 +75,7 @@ export class AddDoctorDialogComponent {
   }
 
   confirm(): void {
-    const clinicId = this.auth.currentUser()?.clinicId;
-    if (this.form.invalid || !clinicId) {
+    if (this.form.invalid) {
       return;
     }
     const value = this.form.getRawValue();
@@ -91,7 +88,7 @@ export class AddDoctorDialogComponent {
       address: value.address as AddressFormValue,
     };
 
-    this.doctorOnboardingService.onboardDoctor(clinicId, request).subscribe({
+    this.doctorOnboardingService.onboardDoctor(request).subscribe({
       next: (doctor) => {
         this.notification.success(`Doctor ${value.firstName} ${value.lastName} onboarded successfully.`);
         this.dialogRef.close(doctor);

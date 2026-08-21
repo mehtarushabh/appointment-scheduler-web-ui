@@ -18,7 +18,7 @@ describe('PatientOnboardingService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('posts a patient to /api/v1/clinics/:id/patients', () => {
+  it('posts a patient to /api/v1/clinics/me/patients', () => {
     const request: UserOnboardingRequest = {
       firstName: 'Pat',
       lastName: 'Ient',
@@ -27,16 +27,16 @@ describe('PatientOnboardingService', () => {
       address: { addressLine1: '9 Oak St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
     };
 
-    service.onboardOrLinkPatient('clinic-1', request).subscribe();
+    service.onboardOrLinkPatient(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1/patients');
+    const req = httpMock.expectOne('/api/v1/clinics/me/patients');
     expect(req.request.method).toBe('POST');
     req.flush({});
   });
 
-  it('lists patients for a clinic', () => {
-    service.listPatients('clinic-1').subscribe();
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1/patients');
+  it("lists the caller's own clinic's patients", () => {
+    service.listPatients().subscribe();
+    const req = httpMock.expectOne('/api/v1/clinics/me/patients');
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });

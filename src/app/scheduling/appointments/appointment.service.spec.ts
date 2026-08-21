@@ -58,9 +58,9 @@ describe('AppointmentService', () => {
     req.flush([]);
   });
 
-  it('lists a clinic\'s appointments', () => {
-    service.listClinicAppointments('clinic-1').subscribe();
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1/appointments');
+  it("lists the caller's own clinic's appointments", () => {
+    service.listClinicAppointments().subscribe();
+    const req = httpMock.expectOne('/api/v1/clinics/me/appointments');
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });

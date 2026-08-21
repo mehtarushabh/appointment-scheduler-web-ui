@@ -18,7 +18,7 @@ describe('ClinicAdminOnboardingService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('posts a new clinic admin to /api/v1/clinics/:id/clinic-admins', () => {
+  it('posts a new clinic admin to /api/v1/clinics/me/clinic-admins', () => {
     const request: UserOnboardingRequest = {
       firstName: 'Second',
       lastName: 'Admin',
@@ -27,9 +27,9 @@ describe('ClinicAdminOnboardingService', () => {
       address: { addressLine1: '1 Main St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
     };
 
-    service.onboardClinicAdmin('clinic-1', request).subscribe();
+    service.onboardClinicAdmin(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1/clinic-admins');
+    const req = httpMock.expectOne('/api/v1/clinics/me/clinic-admins');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(request);
     req.flush({});

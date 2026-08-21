@@ -18,7 +18,7 @@ describe('DoctorOnboardingService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('posts a new doctor to /api/v1/clinics/:id/doctors', () => {
+  it('posts a new doctor to /api/v1/clinics/me/doctors', () => {
     const request: DoctorOnboardingRequest = {
       firstName: 'Dana',
       lastName: 'Doc',
@@ -28,18 +28,18 @@ describe('DoctorOnboardingService', () => {
       address: { addressLine1: '1 Main St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
     };
 
-    service.onboardDoctor('clinic-1', request).subscribe();
+    service.onboardDoctor(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1/doctors');
+    const req = httpMock.expectOne('/api/v1/clinics/me/doctors');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(request);
     req.flush({});
   });
 
-  it('lists doctors for a clinic', () => {
-    service.listDoctors('clinic-1').subscribe();
+  it("lists doctors for the caller's own clinic", () => {
+    service.listDoctors().subscribe();
 
-    const req = httpMock.expectOne('/api/v1/clinics/clinic-1/doctors');
+    const req = httpMock.expectOne('/api/v1/clinics/me/doctors');
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });

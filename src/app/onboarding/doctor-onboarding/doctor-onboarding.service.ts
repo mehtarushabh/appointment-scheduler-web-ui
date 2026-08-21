@@ -7,11 +7,11 @@ import { DoctorOnboardingRequest, UserResponse } from '../../shared/models';
 export class DoctorOnboardingService {
   private readonly http = inject(HttpClient);
 
-  onboardDoctor(clinicId: string, request: DoctorOnboardingRequest): Observable<UserResponse> {
-    return this.http.post<UserResponse>(`/api/v1/clinics/${clinicId}/doctors`, request);
+  onboardDoctor(request: DoctorOnboardingRequest): Observable<UserResponse> {
+    return this.http.post<UserResponse>('/api/v1/clinics/me/doctors', request);
   }
 
-  listDoctors(clinicId: string): Observable<UserResponse[]> {
-    return this.http.get<UserResponse[]>(`/api/v1/clinics/${clinicId}/doctors`);
+  listDoctors(): Observable<UserResponse[]> {
+    return this.http.get<UserResponse[]>('/api/v1/clinics/me/doctors');
   }
 }

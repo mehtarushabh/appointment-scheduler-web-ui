@@ -10,7 +10,6 @@ import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { PatientOnboardingService } from '../patient-onboarding.service';
 import { UserOnboardingRequest, UserResponse } from '../../../shared/models';
-import { AuthService } from '../../../core/auth.service';
 
 /**
  * Two-step "Add a new patient" pop-up (Feature 006 US2), structurally mirroring
@@ -43,7 +42,6 @@ export class AddPatientDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly patientOnboardingService = inject(PatientOnboardingService);
   private readonly notification = inject(NotificationService);
-  private readonly auth = inject(AuthService);
   private readonly dialogRef = inject(MatDialogRef<AddPatientDialogComponent, UserResponse>);
 
   readonly step = signal<'fields' | 'confirm'>('fields');
@@ -78,8 +76,7 @@ export class AddPatientDialogComponent {
   }
 
   confirm(): void {
-    const clinicId = this.auth.currentUser()?.clinicId;
-    if (this.form.invalid || !clinicId) {
+    if (this.form.invalid) {
       return;
     }
     const value = this.form.getRawValue();
@@ -91,7 +88,7 @@ export class AddPatientDialogComponent {
       address: value.address as AddressFormValue,
     };
 
-    this.patientOnboardingService.onboardOrLinkPatient(clinicId, request).subscribe({
+    this.patientOnboardingService.onboardOrLinkPatient(request).subscribe({
       next: (patient) => {
         this.notification.success(`Patient ${value.firstName} ${value.lastName} onboarded successfully.`);
         this.dialogRef.close(patient);
