@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { DoctorLeaveService } from './doctor-leave.service';
 import { AddLeaveDialogComponent } from './add-leave-dialog/add-leave-dialog.component';
@@ -11,7 +12,7 @@ import { toDateOnlyString } from '../../shared/date-utils';
 @Component({
   selector: 'app-doctor-schedule',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule],
+  imports: [MatTableModule, MatButtonModule, MatCardModule],
   templateUrl: './doctor-schedule.component.html',
   styleUrl: './doctor-schedule.component.scss',
 })

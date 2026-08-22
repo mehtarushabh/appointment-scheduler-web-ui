@@ -102,12 +102,12 @@ export const routes: Routes = [
           import('./scheduling/appointments/appointments-list.component').then((m) => m.AppointmentsListComponent),
       },
       {
-        // A Patient never manages appointments directly here — cancellation isn't available to
-        // Patients at all (FR-025, spec Assumptions); this placeholder stays as-is.
+        // A Patient sees their own full appointment history here (read-only — no Cancel/Complete,
+        // per FR-025), reusing the same AppointmentsListComponent as Clinic Admin/Doctor.
         path: 'appointments',
         canMatch: [roleGuard('PATIENT')],
-        loadComponent: () => import('./shared/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-        data: { featureName: 'Appointments' },
+        loadComponent: () =>
+          import('./scheduling/appointments/appointments-list.component').then((m) => m.AppointmentsListComponent),
       },
       {
         path: 'schedule-appointment',

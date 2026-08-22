@@ -1,52 +1,65 @@
-<h2>Schedule appointment</h2>
+<div class="app-page">
+  <h1>Schedule appointment</h1>
 
-@if (showClinicDropdown()) {
-  <mat-form-field appearance="outline">
-    <mat-label>Clinic</mat-label>
-    <mat-select [value]="selectedClinicId()" (selectionChange)="selectClinic($event.value)">
-      @for (clinic of clinics(); track clinic.id) {
-        <mat-option [value]="clinic.id">{{ clinic.name }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-}
+  @if (showClinicDropdown()) {
+    <mat-form-field appearance="outline">
+      <mat-label>Clinic</mat-label>
+      <mat-select [value]="selectedClinicId()" (selectionChange)="selectClinic($event.value)">
+        @for (clinic of clinics(); track clinic.id) {
+          <mat-option [value]="clinic.id">{{ clinic.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
 
-@if (selectedClinicId()) {
-  <mat-form-field appearance="outline">
-    <mat-label>Doctor</mat-label>
-    <mat-select [value]="selectedDoctorId()" (selectionChange)="selectDoctor($event.value)">
-      @for (doctor of doctors(); track doctor.id) {
-        <mat-option [value]="doctor.id">{{ doctorLabel(doctor) }}</mat-option>
-      }
-    </mat-select>
-  </mat-form-field>
-}
+  @if (selectedClinicId()) {
+    <mat-form-field appearance="outline">
+      <mat-label>Select Doctor</mat-label>
+      <mat-select [value]="selectedDoctorId()" (selectionChange)="selectDoctor($event.value)">
+        @for (doctor of doctors(); track doctor.id) {
+          <mat-option [value]="doctor.id">{{ doctorLabel(doctor) }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  }
 
-@if (selectedDoctorId()) {
-  <mat-calendar [selected]="selectedDate()" [dateFilter]="dateFilter" (selectedChange)="selectDate($event)" />
+  @if (selectedDoctorId()) {
+    <mat-card class="app-section app-calendar-card">
+      <mat-card-content>
+        <mat-calendar [selected]="selectedDate()" [dateFilter]="dateFilter" (selectedChange)="selectDate($event)" />
+      </mat-card-content>
+    </mat-card>
 
-  <mat-button-toggle-group [value]="selectedDuration()" (change)="selectDuration($event.value)">
-    <mat-button-toggle [value]="30">30 minutes</mat-button-toggle>
-    <mat-button-toggle [value]="60">60 minutes</mat-button-toggle>
-  </mat-button-toggle-group>
-}
-
-@if (selectedDate()) {
-  @if (availableStartTimes().length === 0) {
-    <p>No available times for this day.</p>
-  } @else {
-    <div class="start-times">
-      @for (time of availableStartTimes(); track time) {
-        <button
-          mat-stroked-button
-          [color]="selectedStartTime() === time ? 'primary' : undefined"
-          (click)="selectStartTime(time)"
-        >
-          {{ time }}
-        </button>
-      }
+    <div class="app-duration-toggle">
+      <mat-button-toggle-group [value]="selectedDuration()" (change)="selectDuration($event.value)">
+        <mat-button-toggle [value]="30">30 minutes</mat-button-toggle>
+        <mat-button-toggle [value]="60">60 minutes</mat-button-toggle>
+      </mat-button-toggle-group>
     </div>
   }
-}
 
-<button mat-flat-button [disabled]="!selectedStartTime()" (click)="confirm()">Confirm</button>
+  @if (selectedDate()) {
+    @if (availableStartTimes().length === 0) {
+      <p>No available times for this day.</p>
+    } @else {
+      <div class="start-times">
+        @for (time of availableStartTimes(); track time) {
+          <button
+            mat-stroked-button
+            [class.app-time-slot-selected]="selectedStartTime() === time"
+            [attr.aria-pressed]="selectedStartTime() === time"
+            (click)="selectStartTime(time)"
+          >
+            {{ time }}
+          </button>
+        }
+      </div>
+    }
+  }
+
+  <div class="app-confirm-bar">
+    <button mat-flat-button [disabled]="!selectedStartTime()" (click)="confirm()">
+      <fa-icon [icon]="faCircleCheck" /> Confirm
+    </button>
+  </div>
+</div>

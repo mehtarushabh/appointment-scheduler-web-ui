@@ -30,7 +30,7 @@ describe('AppointmentsListComponent', () => {
   let completeAppointmentSpy: ReturnType<typeof vi.fn>;
   let notificationServiceStub: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
-  function setup(role: 'CLINIC_ADMIN' | 'DOCTOR', appointments: AppointmentResponse[]) {
+  function setup(role: 'CLINIC_ADMIN' | 'DOCTOR' | 'PATIENT', appointments: AppointmentResponse[]) {
     listClinicAppointmentsSpy = vi.fn().mockReturnValue(of(appointments));
     listMyAppointmentsSpy = vi.fn().mockReturnValue(of(appointments));
     cancelAppointmentSpy = vi.fn();
@@ -109,5 +109,35 @@ describe('AppointmentsListComponent', () => {
     const fixture = setup('CLINIC_ADMIN', []);
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text.toLowerCase()).toContain('no appointments');
+  });
+
+  it('sorts appointments soonest date+time first, regardless of listing order (bugfix)', () => {
+    const fixture = setup('CLINIC_ADMIN', [
+      appointment({ id: 'latest', date: '2026-12-17', startTime: '14:00:00' }),
+      appointment({ id: 'earliest', date: '2026-08-01', startTime: '09:00:00' }),
+      appointment({ id: 'middle-late', date: '2026-09-01', startTime: '16:00:00' }),
+      appointment({ id: 'middle-early', date: '2026-09-01', startTime: '08:00:00' }),
+    ]);
+
+    expect(fixture.componentInstance.sortedAppointments().map((a) => a.id)).toEqual([
+      'earliest',
+      'middle-early',
+      'middle-late',
+      'latest',
+    ]);
+  });
+
+  it("shows a Patient's own appointments, without the Patient column or Cancel/Complete actions (bugfix)", () => {
+    const fixture = setup('PATIENT', [appointment({ id: '1', state: 'SCHEDULED' })]);
+
+    expect(listMyAppointmentsSpy).toHaveBeenCalled();
+    expect(listClinicAppointmentsSpy).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.displayedColumns()).toEqual(['doctorName', 'date', 'startTime', 'state']);
+
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).not.toContain('Cancel');
+    expect(text).not.toContain('Complete');
+    const headers = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('th')).map((th) => th.textContent?.trim());
+    expect(headers).not.toContain('Patient');
   });
 });

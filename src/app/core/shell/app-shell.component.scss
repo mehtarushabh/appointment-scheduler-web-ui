@@ -1,8 +1,13 @@
 // FR-016: stays visible at the top of the viewport when the page content is scrolled.
+// Feature 008: no `color` input is set on the toolbar in the template, so it renders with the
+// theme's default surface colors (a white/light bar) instead of a solid primary-colored one,
+// matching every reference mockup's nav treatment (research.md #4); a border keeps it visually
+// separated from the page content now that it no longer has a solid background color of its own.
 .app-shell-toolbar {
   position: sticky;
   top: 0;
   z-index: 10;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 }
 
 .app-shell-title {
@@ -13,4 +18,14 @@
 
 .app-shell-spacer {
   flex: 1 1 auto;
+}
+
+// Feature 008 (research.md #4): the active nav link's accent-colored text (set via the template's
+// `[color]="... ? 'accent' : undefined"` binding) gets an underline to match the mockups' nav
+// treatment. Angular Material's `color="accent"` on a `mat-button` renders using the theme's
+// primary system color in this Material 3 palette (verified in the running app: the link's
+// computed text color resolves to `--mat-sys-primary`, not `--mat-sys-secondary`) — the underline
+// uses the same token so it always matches the text color exactly, however the theme is tuned.
+.app-nav-link-active {
+  border-bottom: 2px solid var(--mat-sys-primary);
 }

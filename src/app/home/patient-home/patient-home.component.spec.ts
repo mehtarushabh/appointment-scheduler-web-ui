@@ -37,7 +37,7 @@ describe('PatientHomeComponent', () => {
     expect(() => setup([])).not.toThrow();
   });
 
-  it('splits SCHEDULED appointments from CANCELLED/COMPLETED ones', () => {
+  it('only shows SCHEDULED appointments, excluding CANCELLED/COMPLETED ones entirely', () => {
     const fixture = setup([
       appointment({ id: '1', state: 'SCHEDULED' }),
       appointment({ id: '2', state: 'CANCELLED' }),
@@ -45,12 +45,25 @@ describe('PatientHomeComponent', () => {
     ]);
 
     expect(fixture.componentInstance.upcoming().map((a) => a.id)).toEqual(['1']);
-    expect(fixture.componentInstance.past().map((a) => a.id)).toEqual(['2', '3']);
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).not.toContain('CANCELLED');
+    expect(text).not.toContain('COMPLETED');
   });
 
   it('shows a clear empty state when there are no appointments', () => {
     const fixture = setup([]);
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text.toLowerCase()).toContain('no appointments');
+  });
+
+  it('previews only the soonest 6 upcoming appointments, ignoring their listing order (feature 008)', () => {
+    const many = Array.from({ length: 10 }, (_, i) =>
+      appointment({ id: `a${i}`, date: '2026-09-01', startTime: `${String(10 + i).padStart(2, '0')}:00:00` })
+    ).reverse(); // deliberately out of chronological order
+    const fixture = setup(many);
+
+    const upcoming = fixture.componentInstance.upcoming();
+    expect(upcoming.length).toBe(6);
+    expect(upcoming.map((a) => a.id)).toEqual(['a0', 'a1', 'a2', 'a3', 'a4', 'a5']);
   });
 });

@@ -1,43 +1,55 @@
-<form [formGroup]="form" (ngSubmit)="submit()">
+<form class="app-form-wide" [formGroup]="form" (ngSubmit)="submit()">
   <h2>Onboard a clinic</h2>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Clinic name</mat-label>
-    <input matInput formControlName="name" />
-  </mat-form-field>
+  <mat-card class="app-section">
+    <mat-card-header>
+      <mat-card-title>Clinic details</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline">
+        <mat-label>Clinic name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Registered ID</mat-label>
-    <input matInput formControlName="registeredId" />
-  </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Registered ID</mat-label>
+        <input matInput formControlName="registeredId" />
+      </mat-form-field>
 
-  <app-address-form [group]="form.controls.address" />
+      <app-address-form [group]="form.controls.address" />
+    </mat-card-content>
+  </mat-card>
 
-  <h3>First clinic admin</h3>
+  <mat-card class="app-section">
+    <mat-card-header>
+      <mat-card-title>First clinic admin</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline">
+        <mat-label>First name</mat-label>
+        <input matInput formControlName="adminFirstName" />
+      </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>First name</mat-label>
-    <input matInput formControlName="adminFirstName" />
-  </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Last name</mat-label>
+        <input matInput formControlName="adminLastName" />
+      </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Last name</mat-label>
-    <input matInput formControlName="adminLastName" />
-  </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="adminEmail" />
+      </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Email</mat-label>
-    <input matInput type="email" formControlName="adminEmail" />
-  </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Date of birth</mat-label>
+        <input matInput [matDatepicker]="dobPicker" formControlName="adminDateOfBirth" />
+        <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
+        <mat-datepicker #dobPicker />
+      </mat-form-field>
 
-  <mat-form-field appearance="outline">
-    <mat-label>Date of birth</mat-label>
-    <input matInput [matDatepicker]="dobPicker" formControlName="adminDateOfBirth" />
-    <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
-    <mat-datepicker #dobPicker />
-  </mat-form-field>
-
-  <app-address-form [group]="form.controls.adminAddress" />
+      <app-address-form [group]="form.controls.adminAddress" />
+    </mat-card-content>
+  </mat-card>
 
   <button mat-flat-button type="submit" [disabled]="form.invalid">Onboard clinic</button>
 </form>

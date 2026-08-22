@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatCardModule } from '@angular/material/card';
 import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '../../shared/address-form/address-form.component';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { ClinicOnboardingService } from './clinic-onboarding.service';
@@ -22,6 +23,7 @@ import { ClinicOnboardingRequest } from '../../shared/models';
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatCardModule,
     AddressFormComponent,
   ],
   templateUrl: './clinic-onboarding-form.component.html',

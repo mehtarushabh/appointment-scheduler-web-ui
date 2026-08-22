@@ -5,3 +5,11 @@ export function toDateOnlyString(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+/**
+ * Orders items with `date` (yyyy-MM-dd) and `startTime` (HH:mm:ss) fields soonest-first. Both
+ * formats sort correctly as plain strings, so no Date parsing is needed.
+ */
+export function compareBySoonest<T extends { date: string; startTime: string }>(a: T, b: T): number {
+  return a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date);
+}

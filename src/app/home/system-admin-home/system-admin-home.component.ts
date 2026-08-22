@@ -1,5 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { ClinicOnboardingService } from '../../onboarding/clinic-onboarding/clinic-onboarding.service';
 import { ClinicResponse } from '../../shared/models';
 
@@ -7,15 +11,21 @@ import { ClinicResponse } from '../../shared/models';
  * System Admin's Home page (User Story 1): the "Registered Clinics" table with expandable rows,
  * reusing Feature 001's ClinicOnboardingService.listClinics() — no new HTTP call (research.md #2).
  * Supersedes the old plain ClinicListComponent/`/clinics` screen (research.md #3).
+ *
+ * Feature 008: the footer pagination controls are static visual chrome matching the reference
+ * mockup only — no `MatPaginator` behavior is wired in (research.md #5).
  */
 @Component({
   selector: 'app-system-admin-home',
   standalone: true,
-  imports: [MatTableModule],
+  imports: [MatTableModule, MatCardModule, MatButtonModule, FaIconComponent],
   templateUrl: './system-admin-home.component.html',
 })
 export class SystemAdminHomeComponent implements OnInit {
   private readonly clinicOnboardingService = inject(ClinicOnboardingService);
+
+  protected readonly faAngleLeft = faAngleLeft;
+  protected readonly faAngleRight = faAngleRight;
 
   readonly clinics = signal<ClinicResponse[]>([]);
   readonly displayedColumns = ['name', 'city', 'state'];

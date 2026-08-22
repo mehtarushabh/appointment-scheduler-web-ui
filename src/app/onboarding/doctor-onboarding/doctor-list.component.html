@@ -1,46 +1,68 @@
-<div class="header">
-  <h2>Doctors</h2>
-  <button mat-flat-button (click)="openAddDoctorDialog()">Add a new doctor</button>
+<div class="app-page">
+  <mat-card>
+    <div class="app-page-header">
+      <h1>Doctors</h1>
+      <button mat-flat-button (click)="openAddDoctorDialog()">Add a new doctor</button>
+    </div>
+
+    @if (doctors().length === 0) {
+      <p>No doctors onboarded yet.</p>
+    } @else {
+      <table mat-table [dataSource]="doctors()" multiTemplateDataRows>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>
+            <span class="app-header-label">Name <fa-icon [icon]="faArrowUp" /></span>
+          </th>
+          <td mat-cell *matCellDef="let doctor">{{ doctor.firstName }} {{ doctor.lastName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>
+            <span class="app-header-label">Email <fa-icon class="app-sort-icon-inactive" [icon]="faSort" /></span>
+          </th>
+          <td mat-cell *matCellDef="let doctor">{{ doctor.email }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="specialty">
+          <th mat-header-cell *matHeaderCellDef>
+            <span class="app-header-label">Specialty <fa-icon class="app-sort-icon-inactive" [icon]="faSort" /></span>
+          </th>
+          <td mat-cell *matCellDef="let doctor">{{ doctor.specialty }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let doctor" [attr.colspan]="displayedColumns.length">
+            <div>
+              <p>Email: {{ doctor.email }}</p>
+              <p>Date of birth: {{ doctor.dateOfBirth }}</p>
+              <p>Specialty: {{ doctor.specialty }}</p>
+              <p>
+                {{ doctor.address.addressLine1 }}
+                @if (doctor.address.addressLine2) {
+                  , {{ doctor.address.addressLine2 }}
+                }
+                , {{ doctor.address.city }}, {{ doctor.address.state }} {{ doctor.address.zip }}, {{ doctor.address.country }}
+              </p>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let doctor; columns: displayedColumns" (click)="toggle(doctor)"></tr>
+        <tr mat-row *matRowDef="let doctor; columns: ['expandedDetail']" [hidden]="!isExpanded(doctor)"></tr>
+      </table>
+
+      <!--
+        Feature 008 (research.md #5): visual-only pagination chrome matching the reference mockup.
+        Always disabled — there is no MatPaginator behind it, since real pagination isn't part of
+        this app today and adding it would be a functional change out of this restyle's scope.
+      -->
+      <div class="app-pagination-footer">
+        <button mat-icon-button disabled aria-label="First page"><fa-icon [icon]="faAnglesLeft" /></button>
+        <button mat-icon-button disabled aria-label="Previous page"><fa-icon [icon]="faChevronLeft" /></button>
+        <button mat-icon-button disabled aria-label="Next page"><fa-icon [icon]="faChevronRight" /></button>
+        <button mat-icon-button disabled aria-label="Last page"><fa-icon [icon]="faAnglesRight" /></button>
+      </div>
+    }
+  </mat-card>
 </div>
-
-@if (doctors().length === 0) {
-  <p>No doctors onboarded yet.</p>
-} @else {
-  <table mat-table [dataSource]="doctors()" multiTemplateDataRows>
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Name</th>
-      <td mat-cell *matCellDef="let doctor">{{ doctor.firstName }} {{ doctor.lastName }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef>Email</th>
-      <td mat-cell *matCellDef="let doctor">{{ doctor.email }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="specialty">
-      <th mat-header-cell *matHeaderCellDef>Specialty</th>
-      <td mat-cell *matCellDef="let doctor">{{ doctor.specialty }}</td>
-    </ng-container>
-
-    <ng-container matColumnDef="expandedDetail">
-      <td mat-cell *matCellDef="let doctor" [attr.colspan]="displayedColumns.length">
-        <div>
-          <p>Email: {{ doctor.email }}</p>
-          <p>Date of birth: {{ doctor.dateOfBirth }}</p>
-          <p>Specialty: {{ doctor.specialty }}</p>
-          <p>
-            {{ doctor.address.addressLine1 }}
-            @if (doctor.address.addressLine2) {
-              , {{ doctor.address.addressLine2 }}
-            }
-            , {{ doctor.address.city }}, {{ doctor.address.state }} {{ doctor.address.zip }}, {{ doctor.address.country }}
-          </p>
-        </div>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let doctor; columns: displayedColumns" (click)="toggle(doctor)"></tr>
-    <tr mat-row *matRowDef="let doctor; columns: ['expandedDetail']" [hidden]="!isExpanded(doctor)"></tr>
-  </table>
-}

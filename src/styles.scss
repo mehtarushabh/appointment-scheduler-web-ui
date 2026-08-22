@@ -26,6 +26,11 @@ html {
   --app-sys-success: hsl(123 46% 34%);
   --app-sys-success-container: hsl(137 39% 93%);
   --app-sys-on-success-container: hsl(124 55% 24%);
+
+  // Feature 009: the loading overlay's semi-transparent scrim — same reasoning as the success
+  // tokens above, a translucent color has no existing Material system-role token, so it's computed
+  // once here and consumed via var() in loading-overlay.component.scss.
+  --app-loading-overlay-scrim: rgba(0, 0, 0, 0.32);
 }
 
 body {
@@ -59,6 +64,125 @@ form {
   max-width: 480px;
   margin: 2rem auto;
   padding: 0 1rem;
+}
+
+// Bugfix: `mat-form-field` defaults to `display: inline-block`, sized to fit its own content
+// (label/icons/input) rather than stretching to its container — with plain text fields of similar
+// length this went unnoticed, but as soon as one field gains a prefix/suffix icon (e.g. login's
+// email/password fields) their natural widths diverge visibly, and a short field can leave enough
+// room on the same line for the next element (e.g. the submit button) to sit flush against it with
+// no gap. Forcing every form field to a full-width block fixes both symptoms at once, app-wide,
+// rather than patching login specifically.
+form mat-form-field {
+  display: block;
+  width: 100%;
+}
+
+// Bugfix: a form's submit button sitting immediately after its last field (no `mat-card-actions`
+// wrapper in between) had no guaranteed spacing from it. A small top margin gives every such button
+// consistent breathing room; harmless where a wrapper already adds its own spacing.
+form button[type='submit'] {
+  margin-top: 1rem;
+}
+
+// Feature 008 (UI visual redesign): shared layout conventions reused by every restyled screen
+// instead of duplicating spacing/width values per component (research.md #2).
+
+// Wider forms that lay out multiple fields per row (e.g. onboarding forms embedding
+// app-address-form's city/state/zip/country row) need more breathing room than the default
+// single-column 480px form above.
+form.app-form-wide {
+  max-width: 800px;
+}
+
+// Non-form pages (list/table screens, dashboards, the scheduling flow) get the same
+// horizontally-centered, comfortable-width treatment as forms.
+.app-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+// Material 3's default `mat-card` elevation is very subtle (a near-imperceptible tonal surface
+// shift), but every reference mockup shows a clearly bordered, shadowed white panel against the
+// page background. Add that definition once, app-wide, rather than per screen: a theme-token
+// border for a crisp edge, plus a soft drop shadow (a translucent black shadow is how Material's
+// own internal elevation tokens are built too, and `box-shadow` isn't one of stylelint's
+// color-restricted properties) for depth. Targets `.mat-mdc-card` (not just the `mat-card`
+// element selector) because Material's own stylesheet sets `border`/`box-shadow` on that class
+// with equal-or-higher specificity, which silently wins over a bare-element selector otherwise.
+.mat-mdc-card {
+  border: 1px solid var(--mat-sys-outline-variant) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+// A row of fields that should sit side by side on wider viewports and wrap on narrow ones (e.g.
+// city/state/zip/country), instead of each `mat-form-field` stacking full-width.
+.app-field-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+}
+
+.app-field-row mat-form-field {
+  flex: 1 1 140px;
+}
+
+// Consistent spacing between a page's title and the card(s)/table below it. Bugfix: this header
+// sits directly inside a `mat-card` (not wrapped in `mat-card-content`, which is the only element
+// Material's own stylesheet adds padding around) on every list screen that uses it (doctors,
+// patients, appointments, system admin dashboard), so without its own top padding the title touches
+// the card's top edge/border with zero breathing room.
+.app-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+// Consistent spacing between stacked `mat-card` sections on a single screen (e.g. clinic
+// settings' "Profile" and "Working hours" cards, or a form's sequential sections).
+.app-section + .app-section {
+  margin-top: 1.5rem;
+}
+
+// Static, non-interactive table-header sort glyph + pagination footer chrome shared by every
+// list/table screen (doctors, patients, system admin clinics, and their US4 analogs). These are
+// deliberately visual-only — no MatSort/MatPaginator behavior is wired to them (research.md #5).
+.app-header-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.app-sort-icon-inactive {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.app-pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.app-pagination-range {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.875rem;
+}
+
+// A responsive grid of `mat-card`s (e.g. a patient's upcoming-appointment cards).
+.app-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.app-card-grid > mat-card {
+  flex: 1 1 260px;
 }
 
 // Shared toast feedback (feature 004, NotificationService): success is light green with a dark

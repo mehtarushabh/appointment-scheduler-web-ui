@@ -1,6 +1,8 @@
-<h2>My clinics</h2>
-<mat-nav-list>
-  @for (clinic of clinics(); track clinic.id) {
-    <mat-list-item>{{ clinic.name }}</mat-list-item>
-  }
-</mat-nav-list>
+<div class="app-page">
+  <h1>My clinics</h1>
+  <mat-nav-list>
+    @for (clinic of clinics(); track clinic.id) {
+      <mat-list-item>{{ clinic.name }}</mat-list-item>
+    }
+  </mat-nav-list>
+</div>

@@ -1,6 +1,59 @@
-<h2>Welcome back</h2>
+<div class="app-page">
+  <h1>Welcome back</h1>
 
-<p>
-  Upcoming appointments will appear here once the Appointments feature is available. In the
-  meantime, use the Doctors, Patients, and Appointments links above to get around.
-</p>
+  @if (upcoming().length === 0 && past().length === 0) {
+    <p>No appointments yet. Use the Doctors, Patients, and Appointments links above to get around.</p>
+  } @else {
+    @if (upcoming().length === 0) {
+      <p>No upcoming appointments.</p>
+    } @else {
+      <div class="app-card-grid">
+        @for (appointment of upcoming(); track appointment.id) {
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>{{ appointment.patientName }}</mat-card-title>
+              <mat-card-subtitle>{{ appointment.doctorName }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <p>{{ appointment.date }} at {{ appointment.startTime }} ({{ appointment.durationMinutes }} min)</p>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+
+    @if (past().length > 0) {
+      <mat-card class="app-section">
+        <table mat-table [dataSource]="past()">
+          <ng-container matColumnDef="patientName">
+            <th mat-header-cell *matHeaderCellDef>Patient</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="doctorName">
+            <th mat-header-cell *matHeaderCellDef>Doctor</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.doctorName }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.date }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="startTime">
+            <th mat-header-cell *matHeaderCellDef>Time</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.startTime }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="state">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let appointment">{{ appointment.state }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </mat-card>
+    }
+  }
+</div>

@@ -1,5 +1,2 @@
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+// Feature 008: page header/card layout now comes from the shared .app-page/.app-page-header
+// classes in styles.scss (research.md #2) instead of a component-local .header rule.

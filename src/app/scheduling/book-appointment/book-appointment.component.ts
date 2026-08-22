@@ -6,6 +6,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatCardModule } from '@angular/material/card';
+import { FaIconComponent } from '@fortawesome/angular-fontawesome';
+import { faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import { AppointmentService } from '../appointments/appointment.service';
 import { PatientOnboardingService } from '../../onboarding/patient-onboarding/patient-onboarding.service';
 import { ClinicSettingsService } from '../../onboarding/clinic-onboarding/clinic-settings/clinic-settings.service';
@@ -22,7 +25,16 @@ const DAY_OF_WEEK_BY_JS_INDEX: DayOfWeek[] = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WE
 @Component({
   selector: 'app-book-appointment',
   standalone: true,
-  imports: [MatFormFieldModule, MatSelectModule, MatButtonModule, MatButtonToggleModule, MatDatepickerModule, MatNativeDateModule],
+  imports: [
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatCardModule,
+    FaIconComponent,
+  ],
   templateUrl: './book-appointment.component.html',
   styleUrl: './book-appointment.component.scss',
 })
@@ -32,6 +44,8 @@ export class BookAppointmentComponent implements OnInit {
   private readonly clinicSettingsService = inject(ClinicSettingsService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
+
+  protected readonly faCircleCheck = faCircleCheck;
 
   readonly clinics = signal<ClinicResponse[]>([]);
   readonly selectedClinicId = signal<string | null>(null);

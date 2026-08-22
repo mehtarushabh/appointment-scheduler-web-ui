@@ -1,4 +1,4 @@
-<mat-toolbar color="primary" class="app-shell-toolbar">
+<mat-toolbar class="app-shell-toolbar">
   <span class="app-shell-title">{{ title() }}</span>
 
   @if (loggedIn()) {
@@ -9,12 +9,20 @@
       #homeActive="routerLinkActive"
       [routerLinkActiveOptions]="{ exact: true }"
       [color]="homeActive.isActive ? 'accent' : undefined"
+      [class.app-nav-link-active]="homeActive.isActive"
     >
       Home
     </a>
 
     @for (link of navLinks(); track link.path) {
-      <a mat-button [routerLink]="link.path" routerLinkActive #linkActive="routerLinkActive" [color]="linkActive.isActive ? 'accent' : undefined">
+      <a
+        mat-button
+        [routerLink]="link.path"
+        routerLinkActive
+        #linkActive="routerLinkActive"
+        [color]="linkActive.isActive ? 'accent' : undefined"
+        [class.app-nav-link-active]="linkActive.isActive"
+      >
         {{ link.label }}
       </a>
     }

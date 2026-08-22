@@ -98,6 +98,24 @@ describe('BookAppointmentComponent', () => {
     expect(fixture.componentInstance.availableStartTimes()).toEqual(['09:00:00', '09:30:00']);
   });
 
+  it('visually marks the selected start time distinctly from the others (bugfix)', () => {
+    const fixture = setup([clinic('clinic-1')]);
+    fixture.componentInstance.selectDoctor('doc-1');
+    fixture.componentInstance.selectDate(new Date(2026, 7, 24));
+    fixture.componentInstance.selectDuration(30);
+    fixture.detectChanges();
+
+    const buttons = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.start-times button'));
+    expect(buttons().some((b) => b.classList.contains('app-time-slot-selected'))).toBe(false);
+
+    fixture.componentInstance.selectStartTime('09:00:00');
+    fixture.detectChanges();
+
+    const selected = buttons().filter((b) => b.classList.contains('app-time-slot-selected'));
+    expect(selected.length).toBe(1);
+    expect(selected[0].textContent?.trim()).toBe('09:00:00');
+  });
+
   it('books the appointment, shows a success toast, and navigates home', () => {
     const created = { id: 'appt-1', state: 'SCHEDULED' } as AppointmentResponse;
     const fixture = setup([clinic('clinic-1')]);

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { PatientOnboardingService } from './patient-onboarding.service';
 import { AddPatientDialogComponent } from './add-patient-dialog/add-patient-dialog.component';
@@ -13,7 +14,7 @@ import { UserResponse } from '../../shared/models';
 @Component({
   selector: 'app-patient-list',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule],
+  imports: [MatTableModule, MatButtonModule, MatCardModule],
   templateUrl: './patient-list.component.html',
   styleUrl: './patient-list.component.scss',
 })

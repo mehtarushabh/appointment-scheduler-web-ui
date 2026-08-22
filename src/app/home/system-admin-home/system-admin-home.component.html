@@ -1,44 +1,62 @@
-<h2>Registered Clinics</h2>
+<div class="app-page">
+  <mat-card>
+    <div class="app-page-header">
+      <h1>Registered Clinics</h1>
+    </div>
 
-@if (clinics().length === 0) {
-  <p>No clinics registered yet.</p>
-} @else {
-  <table mat-table [dataSource]="clinics()" multiTemplateDataRows>
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Clinic name</th>
-      <td mat-cell *matCellDef="let clinic">{{ clinic.name }}</td>
-    </ng-container>
+    @if (clinics().length === 0) {
+      <p>No clinics registered yet.</p>
+    } @else {
+      <table mat-table [dataSource]="clinics()" multiTemplateDataRows>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Clinic name</th>
+          <td mat-cell *matCellDef="let clinic">{{ clinic.name }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="city">
-      <th mat-header-cell *matHeaderCellDef>City</th>
-      <td mat-cell *matCellDef="let clinic">{{ clinic.address.city }}</td>
-    </ng-container>
+        <ng-container matColumnDef="city">
+          <th mat-header-cell *matHeaderCellDef>City</th>
+          <td mat-cell *matCellDef="let clinic">{{ clinic.address.city }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="state">
-      <th mat-header-cell *matHeaderCellDef>State</th>
-      <td mat-cell *matCellDef="let clinic">{{ clinic.address.state }}</td>
-    </ng-container>
+        <ng-container matColumnDef="state">
+          <th mat-header-cell *matHeaderCellDef>State</th>
+          <td mat-cell *matCellDef="let clinic">{{ clinic.address.state }}</td>
+        </ng-container>
 
-    <ng-container matColumnDef="expandedDetail">
-      <td mat-cell *matCellDef="let clinic" [attr.colspan]="displayedColumns.length">
-        <div>
-          <p>
-            {{ clinic.address.addressLine1 }}
-            @if (clinic.address.addressLine2) {
-              , {{ clinic.address.addressLine2 }}
-            }
-            , {{ clinic.address.city }}, {{ clinic.address.state }} {{ clinic.address.zip }}, {{ clinic.address.country }}
-          </p>
-          <p>Registered ID: {{ clinic.registeredId }}</p>
-          @if (clinic.firstClinicAdmin; as admin) {
-            <p>Clinic admin: {{ admin.firstName }} {{ admin.lastName }} ({{ admin.email }})</p>
-          }
-        </div>
-      </td>
-    </ng-container>
+        <ng-container matColumnDef="expandedDetail">
+          <td mat-cell *matCellDef="let clinic" [attr.colspan]="displayedColumns.length">
+            <div>
+              <p>
+                {{ clinic.address.addressLine1 }}
+                @if (clinic.address.addressLine2) {
+                  , {{ clinic.address.addressLine2 }}
+                }
+                , {{ clinic.address.city }}, {{ clinic.address.state }} {{ clinic.address.zip }}, {{ clinic.address.country }}
+              </p>
+              <p>Registered ID: {{ clinic.registeredId }}</p>
+              @if (clinic.firstClinicAdmin; as admin) {
+                <p>Clinic admin: {{ admin.firstName }} {{ admin.lastName }} ({{ admin.email }})</p>
+              }
+            </div>
+          </td>
+        </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let clinic; columns: displayedColumns" (click)="toggle(clinic)"></tr>
-    <tr mat-row *matRowDef="let clinic; columns: ['expandedDetail']" [hidden]="!isExpanded(clinic)"></tr>
-  </table>
-}
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let clinic; columns: displayedColumns" (click)="toggle(clinic)"></tr>
+        <tr mat-row *matRowDef="let clinic; columns: ['expandedDetail']" [hidden]="!isExpanded(clinic)"></tr>
+      </table>
+
+      <!--
+        Feature 008 (research.md #5): visual-only pagination footer matching the reference mockup.
+        The range always reflects the full (unpaginated) result set, and prev/next are always
+        disabled — there is no MatPaginator behind them, since real pagination isn't part of this
+        app today and adding it would be a functional change out of this restyle's scope.
+      -->
+      <div class="app-pagination-footer">
+        <span class="app-pagination-range">1 - {{ clinics().length }} of {{ clinics().length }}</span>
+        <button mat-icon-button disabled aria-label="Previous page"><fa-icon [icon]="faAngleLeft" /></button>
+        <button mat-icon-button disabled aria-label="Next page"><fa-icon [icon]="faAngleRight" /></button>
+      </div>
+    }
+  </mat-card>
+</div>
