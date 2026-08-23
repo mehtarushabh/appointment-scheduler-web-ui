@@ -1,0 +1,59 @@
+<form class="app-form-wide" [formGroup]="form" (ngSubmit)="save()">
+  <h2>Edit profile</h2>
+
+  <mat-card class="app-section">
+    <mat-card-content>
+      <mat-form-field appearance="outline">
+        <mat-label>First name</mat-label>
+        <input matInput formControlName="firstName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Last name</mat-label>
+        <input matInput formControlName="lastName" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput [value]="email()" readonly disabled />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Date of birth</mat-label>
+        <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" />
+        <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
+        <mat-datepicker #dobPicker />
+      </mat-form-field>
+
+      @if (isDoctor()) {
+        <mat-form-field appearance="outline">
+          <mat-label>Specialty</mat-label>
+          <input matInput formControlName="specialty" />
+        </mat-form-field>
+      }
+
+      <app-address-form [group]="form.controls.address" />
+
+      @if (isPatient()) {
+        <h3>Insurance</h3>
+        <mat-form-field appearance="outline">
+          <mat-label>Insurance name</mat-label>
+          <input matInput formControlName="insuranceName" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Group ID</mat-label>
+          <input matInput formControlName="groupId" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Member ID</mat-label>
+          <input matInput formControlName="memberId" />
+        </mat-form-field>
+      }
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button type="submit" [disabled]="form.invalid">Save profile</button>
+    </mat-card-actions>
+  </mat-card>
+</form>

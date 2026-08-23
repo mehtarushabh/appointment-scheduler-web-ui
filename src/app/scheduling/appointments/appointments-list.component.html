@@ -1,13 +1,13 @@
 <div class="app-page">
-  <mat-card>
+  <mat-card class="app-section">
     <div class="app-page-header">
       <h1>Appointments</h1>
     </div>
 
-    @if (appointments().length === 0) {
-      <p>No appointments yet.</p>
+    @if (scheduledAppointments().length === 0) {
+      <p>No scheduled appointments.</p>
     } @else {
-      <table mat-table [dataSource]="sortedAppointments()">
+      <table mat-table [dataSource]="scheduledAppointments()">
         <ng-container matColumnDef="patientName">
           <th mat-header-cell *matHeaderCellDef>Patient</th>
           <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
@@ -43,9 +43,67 @@
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+        <tr mat-header-row *matHeaderRowDef="scheduledColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: scheduledColumns()"></tr>
       </table>
+
+      <mat-paginator
+        [length]="scheduledTotalElements()"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[pageSize]"
+        [pageIndex]="scheduledPageIndex()"
+        (page)="onScheduledPage($event)"
+        aria-label="Select page of scheduled appointments"
+      />
+    }
+  </mat-card>
+
+  <mat-card class="app-section">
+    <div class="app-page-header">
+      <h1>Past appointments</h1>
+    </div>
+
+    @if (pastAppointments().length === 0) {
+      <p>No past appointments.</p>
+    } @else {
+      <table mat-table [dataSource]="pastAppointments()">
+        <ng-container matColumnDef="patientName">
+          <th mat-header-cell *matHeaderCellDef>Patient</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="doctorName">
+          <th mat-header-cell *matHeaderCellDef>Doctor</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.doctorName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.date }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="startTime">
+          <th mat-header-cell *matHeaderCellDef>Time</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.startTime }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="state">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let appointment">{{ appointment.state }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="pastColumns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: pastColumns()"></tr>
+      </table>
+
+      <mat-paginator
+        [length]="pastTotalElements()"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="[pageSize]"
+        [pageIndex]="pastPageIndex()"
+        (page)="onPastPage($event)"
+        aria-label="Select page of past appointments"
+      />
     }
   </mat-card>
 </div>

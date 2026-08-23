@@ -90,6 +90,11 @@ export const routes: Routes = [
           import('./core/change-password/change-password.component').then((m) => m.ChangePasswordComponent),
       },
       {
+        path: 'edit-profile',
+        canMatch: [authGuard],
+        loadComponent: () => import('./core/edit-profile/edit-profile.component').then((m) => m.EditProfileComponent),
+      },
+      {
         path: 'appointments',
         canMatch: [roleGuard('CLINIC_ADMIN')],
         loadComponent: () =>

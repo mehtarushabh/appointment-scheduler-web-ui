@@ -1,0 +1,13 @@
+// Feature 009: a full-viewport, blocking scrim (spec FR-006) that sits above every other layer in
+// the app, including the shell's sticky toolbar (`app-shell.component.scss`'s `.app-shell-toolbar`
+// uses z-index: 10) — research.md #4.
+.app-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--app-loading-overlay-scrim);
+  color: var(--mat-sys-primary);
+}

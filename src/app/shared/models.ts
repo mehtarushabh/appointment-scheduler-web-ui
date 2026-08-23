@@ -28,6 +28,43 @@ export interface UserResponse {
   specialty: string | null;
 }
 
+/** Mirrors DoctorProfileDetails in contracts/edit-profile-api.yaml (Feature 011) — Doctor-only. */
+export interface DoctorProfileDetails {
+  specialty: string;
+}
+
+/** Mirrors PatientProfileDetails in contracts/edit-profile-api.yaml (Feature 011) — Patient-only, all optional. */
+export interface PatientProfileDetails {
+  insuranceName: string | null;
+  groupId: string | null;
+  memberId: string | null;
+}
+
+/**
+ * Mirrors MyProfileResponse in contracts/edit-profile-api.yaml — the caller's own full, editable
+ * profile (GET/PATCH /me/profile), deliberately kept separate from MeResponse (research.md #1).
+ * doctorDetails/patientDetails are present only for their own role, null for every other role.
+ */
+export interface MyProfileResponse {
+  firstName: string;
+  lastName: string;
+  email: string;
+  dateOfBirth: string;
+  address: AddressFormValue;
+  doctorDetails: DoctorProfileDetails | null;
+  patientDetails: PatientProfileDetails | null;
+}
+
+/** Mirrors UpdateMyProfileRequest in contracts/edit-profile-api.yaml. */
+export interface UpdateMyProfileRequest {
+  firstName: string;
+  lastName: string;
+  dateOfBirth: string;
+  address: AddressFormValue;
+  doctorDetails: DoctorProfileDetails | null;
+  patientDetails: PatientProfileDetails | null;
+}
+
 export interface ClinicOnboardingRequest {
   name: string;
   address: AddressFormValue;
@@ -86,6 +123,37 @@ export interface BookAppointmentRequest {
 }
 
 export type AppointmentState = 'SCHEDULED' | 'CANCELLED' | 'COMPLETED';
+
+/**
+ * Mirrors AppointmentCriteria in contracts/appointment-search-api.yaml (Feature 013). Every field
+ * is optional — an absent field means "no restriction on this dimension" — combined with, never
+ * widening, the caller's own scope (data-model.md).
+ */
+export interface AppointmentCriteria {
+  states?: AppointmentState[] | null;
+  dateOnOrAfter?: string | null;
+  dateOnOrBefore?: string | null;
+}
+
+/** Mirrors AppointmentSearchRequest in contracts/appointment-search-api.yaml. */
+export interface AppointmentSearchRequest {
+  criteria?: AppointmentCriteria | null;
+  page: number;
+  size: number;
+}
+
+/**
+ * Mirrors PageResponse in contracts/appointment-search-api.yaml — a generic paged-response shape
+ * (data-model.md); this feature is its only current user, but nothing about it is
+ * Appointment-specific.
+ */
+export interface PageResponse<T> {
+  items: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
 
 /** Mirrors LeaveRequest in contracts/appointment-scheduling-api.yaml. */
 export interface LeaveRequest {

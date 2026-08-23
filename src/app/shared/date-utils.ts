@@ -13,3 +13,30 @@ export function toDateOnlyString(date: Date): string {
 export function compareBySoonest<T extends { date: string; startTime: string }>(a: T, b: T): number {
   return a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date);
 }
+
+/** Whether a `yyyy-MM-dd` date string is the current local calendar day (feature 010). */
+export function isToday(dateStr: string): boolean {
+  return dateStr === toDateOnlyString(new Date());
+}
+
+/**
+ * Whether a `yyyy-MM-dd` date string falls within the next `days` local calendar days, counting
+ * today as day 1 — e.g. `days=7` covers today through 6 days from now, inclusive (feature 010).
+ * `yyyy-MM-dd` sorts correctly as a plain string, so no Date parsing of `dateStr` itself is needed.
+ */
+export function isWithinNextDays(dateStr: string, days: number): boolean {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = toDateOnlyString(today);
+
+  const end = new Date(today);
+  end.setDate(end.getDate() + days - 1);
+  const endStr = toDateOnlyString(end);
+
+  return dateStr >= todayStr && dateStr <= endStr;
+}
+
+/** Whether a `yyyy-MM-dd` date string is strictly before the current local calendar day (feature 012). */
+export function isPastDue(dateStr: string): boolean {
+  return dateStr < toDateOnlyString(new Date());
+}

@@ -22,26 +22,47 @@ function appointment(overrides: Partial<AppointmentResponse>): AppointmentRespon
 }
 
 describe('PatientHomeComponent', () => {
+  beforeEach(() => {
+    // Fixed local "now" so isWithinNextDays()-based filtering is deterministic (feature 010).
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 7, 22, 15, 30, 0)); // 2026-08-22, mid-afternoon
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   function setup(appointments: AppointmentResponse[]) {
-    const listMyAppointmentsSpy = vi.fn().mockReturnValue(of(appointments));
+    const searchMyAppointmentsSpy = vi.fn().mockReturnValue(
+      of({ items: appointments, page: 0, size: 100, totalElements: appointments.length, totalPages: 1 })
+    );
     TestBed.configureTestingModule({
       imports: [PatientHomeComponent],
-      providers: [{ provide: AppointmentService, useValue: { listMyAppointments: listMyAppointmentsSpy } }],
+      providers: [{ provide: AppointmentService, useValue: { searchMyAppointments: searchMyAppointmentsSpy } }],
     });
     const fixture = TestBed.createComponent(PatientHomeComponent);
     fixture.detectChanges();
-    return fixture;
+    return { fixture, searchMyAppointmentsSpy };
   }
 
   it('renders', () => {
     expect(() => setup([])).not.toThrow();
   });
 
+  it('requests only its own SCHEDULED appointments within the upcoming week, not its entire history (feature 013)', () => {
+    const { searchMyAppointmentsSpy } = setup([appointment({ id: '1' })]);
+    expect(searchMyAppointmentsSpy).toHaveBeenCalledWith({
+      criteria: { states: ['SCHEDULED'], dateOnOrAfter: '2026-08-22', dateOnOrBefore: '2026-08-28' },
+      page: 0,
+      size: 100,
+    });
+  });
+
   it('only shows SCHEDULED appointments, excluding CANCELLED/COMPLETED ones entirely', () => {
-    const fixture = setup([
-      appointment({ id: '1', state: 'SCHEDULED' }),
-      appointment({ id: '2', state: 'CANCELLED' }),
-      appointment({ id: '3', state: 'COMPLETED' }),
+    const { fixture } = setup([
+      appointment({ id: '1', date: '2026-08-24', state: 'SCHEDULED' }),
+      appointment({ id: '2', date: '2026-08-24', state: 'CANCELLED' }),
+      appointment({ id: '3', date: '2026-08-24', state: 'COMPLETED' }),
     ]);
 
     expect(fixture.componentInstance.upcoming().map((a) => a.id)).toEqual(['1']);
@@ -51,19 +72,30 @@ describe('PatientHomeComponent', () => {
   });
 
   it('shows a clear empty state when there are no appointments', () => {
-    const fixture = setup([]);
+    const { fixture } = setup([]);
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text.toLowerCase()).toContain('no appointments');
   });
 
-  it('previews only the soonest 6 upcoming appointments, ignoring their listing order (feature 008)', () => {
-    const many = Array.from({ length: 10 }, (_, i) =>
-      appointment({ id: `a${i}`, date: '2026-09-01', startTime: `${String(10 + i).padStart(2, '0')}:00:00` })
+  it('shows every SCHEDULED appointment within the next 7 days (today through 6 days out, inclusive), with no count-based cap (feature 010)', () => {
+    const { fixture } = setup([
+      appointment({ id: 'today', date: '2026-08-22' }),
+      appointment({ id: 'day-6', date: '2026-08-28' }), // inclusive boundary: today + 6 days
+      appointment({ id: 'day-7-excluded', date: '2026-08-29' }), // first excluded day
+      appointment({ id: 'yesterday-excluded', date: '2026-08-21' }),
+    ]);
+
+    expect(fixture.componentInstance.upcoming().map((a) => a.id)).toEqual(['today', 'day-6']);
+  });
+
+  it('shows more than 6 appointments within the window when that many exist, ignoring their listing order (feature 010, supersedes feature 008 preview cap)', () => {
+    const many = Array.from({ length: 8 }, (_, i) =>
+      appointment({ id: `a${i}`, date: '2026-08-22', startTime: `${String(9 + i).padStart(2, '0')}:00:00` })
     ).reverse(); // deliberately out of chronological order
-    const fixture = setup(many);
+    const { fixture } = setup(many);
 
     const upcoming = fixture.componentInstance.upcoming();
-    expect(upcoming.length).toBe(6);
-    expect(upcoming.map((a) => a.id)).toEqual(['a0', 'a1', 'a2', 'a3', 'a4', 'a5']);
+    expect(upcoming.length).toBe(8);
+    expect(upcoming.map((a) => a.id)).toEqual(['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7']);
   });
 });

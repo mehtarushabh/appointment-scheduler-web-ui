@@ -3,9 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AppointmentResponse,
+  AppointmentSearchRequest,
   AvailableSlotsResponse,
   BookAppointmentRequest,
   DoctorSummaryResponse,
+  PageResponse,
 } from '../../shared/models';
 
 /**
@@ -31,12 +33,14 @@ export class AppointmentService {
     return this.http.post<AppointmentResponse>('/api/v1/appointments', request);
   }
 
-  listMyAppointments(): Observable<AppointmentResponse[]> {
-    return this.http.get<AppointmentResponse[]>('/api/v1/me/appointments');
+  /** Replaces listMyAppointments (Feature 013) — a criteria/paged search over the caller's own appointments. */
+  searchMyAppointments(request: AppointmentSearchRequest): Observable<PageResponse<AppointmentResponse>> {
+    return this.http.post<PageResponse<AppointmentResponse>>('/api/v1/me/appointments/search', request);
   }
 
-  listClinicAppointments(): Observable<AppointmentResponse[]> {
-    return this.http.get<AppointmentResponse[]>('/api/v1/clinics/me/appointments');
+  /** Replaces listClinicAppointments (Feature 013) — a criteria/paged search over the caller's own clinic's appointments. */
+  searchClinicAppointments(request: AppointmentSearchRequest): Observable<PageResponse<AppointmentResponse>> {
+    return this.http.post<PageResponse<AppointmentResponse>>('/api/v1/clinics/me/appointments/search', request);
   }
 
   cancelAppointment(appointmentId: string): Observable<AppointmentResponse> {

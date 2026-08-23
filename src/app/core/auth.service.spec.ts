@@ -41,6 +41,18 @@ describe('AuthService', () => {
     expect(JSON.parse(sessionStorage.getItem('appointment-scheduler.session')!).firstName).toBe('Ada');
   });
 
+  it("updates the current user's display name and persists it, after an Edit Profile save", () => {
+    service.login('ada@example.com', 'correct-horse').subscribe();
+    httpMock.expectOne('/api/v1/auth/login').flush({ token: 'jwt-token', role: 'SYSTEM_ADMIN', clinicId: null });
+    httpMock.expectOne('/api/v1/me').flush({ firstName: 'Ada', lastName: 'Admin', clinicName: null });
+
+    service.updateDisplayName('Ada', 'Adminson');
+
+    expect(service.currentUser()?.firstName).toBe('Ada');
+    expect(service.currentUser()?.lastName).toBe('Adminson');
+    expect(JSON.parse(sessionStorage.getItem('appointment-scheduler.session')!).lastName).toBe('Adminson');
+  });
+
   it('leaves the user unauthenticated when login fails', () => {
     service.login('ada@example.com', 'wrong-password').subscribe({
       error: () => {},

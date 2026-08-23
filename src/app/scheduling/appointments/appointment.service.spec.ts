@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { AppointmentService } from './appointment.service';
-import { BookAppointmentRequest } from '../../shared/models';
+import { AppointmentSearchRequest, BookAppointmentRequest } from '../../shared/models';
 
 describe('AppointmentService', () => {
   let service: AppointmentService;
@@ -51,18 +51,22 @@ describe('AppointmentService', () => {
     req.flush({});
   });
 
-  it("lists the caller's own appointments", () => {
-    service.listMyAppointments().subscribe();
-    const req = httpMock.expectOne('/api/v1/me/appointments');
-    expect(req.request.method).toBe('GET');
-    req.flush([]);
+  it("searches the caller's own appointments (Feature 013)", () => {
+    const request: AppointmentSearchRequest = { criteria: { states: ['SCHEDULED'] }, page: 0, size: 50 };
+    service.searchMyAppointments(request).subscribe();
+    const req = httpMock.expectOne('/api/v1/me/appointments/search');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(request);
+    req.flush({ items: [], page: 0, size: 50, totalElements: 0, totalPages: 0 });
   });
 
-  it("lists the caller's own clinic's appointments", () => {
-    service.listClinicAppointments().subscribe();
-    const req = httpMock.expectOne('/api/v1/clinics/me/appointments');
-    expect(req.request.method).toBe('GET');
-    req.flush([]);
+  it("searches the caller's own clinic's appointments (Feature 013)", () => {
+    const request: AppointmentSearchRequest = { criteria: { states: ['SCHEDULED'] }, page: 0, size: 50 };
+    service.searchClinicAppointments(request).subscribe();
+    const req = httpMock.expectOne('/api/v1/clinics/me/appointments/search');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual(request);
+    req.flush({ items: [], page: 0, size: 50, totalElements: 0, totalPages: 0 });
   });
 
   it('cancels an appointment', () => {

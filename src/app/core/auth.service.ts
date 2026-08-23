@@ -74,6 +74,21 @@ export class AuthService {
     return this.session()?.role === role;
   }
 
+  /**
+   * Keeps the shell's title-bar user name in sync right after an Edit Profile save (SC-002,
+   * quickstart Scenario 2) — otherwise it would keep showing the name captured at login until the
+   * next log-in, since nothing else re-fetches GET /me for the lifetime of a session.
+   */
+  updateDisplayName(firstName: string, lastName: string): void {
+    const current = this.session();
+    if (!current) {
+      return;
+    }
+    const updated = { ...current, firstName, lastName };
+    this.session.set(updated);
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updated));
+  }
+
   private restoreSession(): AuthSession | null {
     const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
     return stored ? (JSON.parse(stored) as AuthSession) : null;

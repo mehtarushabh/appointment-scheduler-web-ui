@@ -2,19 +2,26 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { AppointmentService } from '../../scheduling/appointments/appointment.service';
 import { AppointmentResponse } from '../../shared/models';
-import { compareBySoonest } from '../../shared/date-utils';
-
-/** How many upcoming appointments the home dashboard previews — the Appointments tab has the full list. */
-const UPCOMING_PREVIEW_LIMIT = 6;
+import { compareBySoonest, isWithinNextDays, toDateOnlyString } from '../../shared/date-utils';
 
 /**
- * Patient's Home page (User Story 4, FR-022): upcoming (SCHEDULED) appointments as cards only —
- * past/completed/cancelled appointments belong on the Appointments tab, not the "Welcome back"
- * screen, so they are deliberately not fetched or shown here at all.
+ * How many days ahead (inclusive of today) the Patient home dashboard previews (feature 010). Kept
+ * as a single named constant — not inlined — per spec FR-008, so a future profile-editing feature
+ * can source this from a per-user preference instead of this fixed default without reworking the
+ * filtering logic itself.
+ */
+const PATIENT_HOME_WINDOW_DAYS = 7;
+
+/**
+ * Patient's Home page ("upcoming week," feature 010): every SCHEDULED appointment within the next
+ * `PATIENT_HOME_WINDOW_DAYS` days (today through 6 days from now, inclusive) as cards — past/
+ * completed/cancelled appointments, and anything further out, belong on the Appointments tab, not
+ * the "Welcome back" screen, so they are deliberately not shown here at all.
  *
- * Feature 008: this is a preview, not the full list (the Appointments tab is), so `upcoming` is
- * capped to the soonest few — with months of real appointment data, an uncapped grid would render
- * hundreds of cards on a "Welcome back" screen.
+ * Feature 013: requests exactly that window directly from the server (resolved via clarification
+ * to stay forward-looking, unlike Clinic Admin/Doctor — a Patient has no Complete/Cancel actions
+ * to use on an overdue view) instead of fetching the patient's entire appointment history and
+ * filtering it here.
  */
 @Component({
   selector: 'app-patient-home',
@@ -29,12 +36,21 @@ export class PatientHomeComponent implements OnInit {
 
   readonly upcoming = computed(() =>
     this.appointments()
-      .filter((a) => a.state === 'SCHEDULED')
+      .filter((a) => a.state === 'SCHEDULED' && isWithinNextDays(a.date, PATIENT_HOME_WINDOW_DAYS))
       .sort(compareBySoonest)
-      .slice(0, UPCOMING_PREVIEW_LIMIT)
   );
 
   ngOnInit(): void {
-    this.appointmentService.listMyAppointments().subscribe((appointments) => this.appointments.set(appointments));
+    const today = new Date();
+    const windowEnd = new Date(today);
+    windowEnd.setDate(windowEnd.getDate() + PATIENT_HOME_WINDOW_DAYS - 1);
+
+    this.appointmentService
+      .searchMyAppointments({
+        criteria: { states: ['SCHEDULED'], dateOnOrAfter: toDateOnlyString(today), dateOnOrBefore: toDateOnlyString(windowEnd) },
+        page: 0,
+        size: 100,
+      })
+      .subscribe((response) => this.appointments.set(response.items));
   }
 }
