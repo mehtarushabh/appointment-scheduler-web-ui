@@ -3,8 +3,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { FaIconComponent } from '@fortawesome/angular-fontawesome';
-import { faArrowUp, faSort, faAnglesLeft, faAnglesRight, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { DoctorOnboardingService } from './doctor-onboarding.service';
 import { AddDoctorDialogComponent } from './add-doctor-dialog/add-doctor-dialog.component';
 import { UserResponse } from '../../shared/models';
@@ -12,28 +10,17 @@ import { UserResponse } from '../../shared/models';
 /**
  * Clinic Admin's table of their own clinic's doctors (Feature 001 US2; row-expansion and the
  * "Add a new doctor" pop-up are Feature 005, FR-003/FR-005).
- *
- * Feature 008: the header sort icons and footer pagination controls are static visual chrome
- * matching the reference mockup only — no `MatSort`/`MatPaginator` behavior is wired in, since
- * sorting/pagination isn't functionality this app has today (research.md #5).
  */
 @Component({
   selector: 'app-doctor-list',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatCardModule, FaIconComponent],
+  imports: [MatTableModule, MatButtonModule, MatCardModule],
   templateUrl: './doctor-list.component.html',
   styleUrl: './doctor-list.component.scss',
 })
 export class DoctorListComponent implements OnInit {
   private readonly doctorOnboardingService = inject(DoctorOnboardingService);
   private readonly dialog = inject(MatDialog);
-
-  protected readonly faArrowUp = faArrowUp;
-  protected readonly faSort = faSort;
-  protected readonly faAnglesLeft = faAnglesLeft;
-  protected readonly faAnglesRight = faAnglesRight;
-  protected readonly faChevronLeft = faChevronLeft;
-  protected readonly faChevronRight = faChevronRight;
 
   readonly doctors = signal<UserResponse[]>([]);
   readonly displayedColumns = ['name', 'email', 'specialty'];

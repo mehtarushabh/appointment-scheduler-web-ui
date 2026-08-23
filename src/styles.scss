@@ -163,19 +163,6 @@ form.app-form-wide {
   margin-top: 1.5rem;
 }
 
-// Static, non-interactive table-header sort glyph + pagination footer chrome shared by every
-// list/table screen (doctors, patients, system admin clinics, and their US4 analogs). These are
-// deliberately visual-only — no MatSort/MatPaginator behavior is wired to them (research.md #5).
-.app-header-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.app-sort-icon-inactive {
-  color: var(--mat-sys-on-surface-variant);
-}
-
 // Feature 013: the real MatPaginator, like .app-page-header/the table before it, needs to match
 // this app's 1rem side padding when it sits directly inside a `mat-card` — its own built-in inner
 // padding is only 8px, so this adds the remaining 8px to reach that same 1rem.
@@ -183,26 +170,21 @@ form.app-form-wide {
   padding: 0 0.5rem;
 }
 
-// Bugfix: same root cause as .app-page-header above — sits directly inside a `mat-card`, so
-// without its own side padding its buttons touch the card's right edge.
-.app-pagination-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-}
-
-.app-pagination-range {
-  color: var(--mat-sys-on-surface-variant);
-  font-size: 0.875rem;
-}
-
 // Feature 012: the past-due alert icon needs to stand out from the card title text it sits next
 // to, and needs a little breathing room from it.
 .app-overdue-icon {
   color: var(--mat-sys-error);
   margin-left: 0.375rem;
+}
+
+// Feature 014: colors an appointment's status word only (never its row or a background) — applied
+// via a <span> wrapping just that text, reusing the same error/success tokens as above.
+.app-status-cancelled {
+  color: var(--mat-sys-error);
+}
+
+.app-status-completed {
+  color: var(--app-sys-success);
 }
 
 // A responsive grid of `mat-card`s (e.g. a patient's upcoming-appointment cards).

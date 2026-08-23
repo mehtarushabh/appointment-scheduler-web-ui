@@ -8,6 +8,7 @@ import { AppointmentService } from './appointment.service';
 import { AuthService } from '../../core/auth.service';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { AppointmentCriteria, AppointmentResponse, AppointmentSearchRequest, PageResponse } from '../../shared/models';
+import { appointmentStatusClass } from '../../shared/appointment-status-utils';
 
 const FULL_COLUMNS = ['patientName', 'doctorName', 'date', 'startTime', 'state'];
 const PATIENT_COLUMNS = ['doctorName', 'date', 'startTime', 'state'];
@@ -44,6 +45,7 @@ export class AppointmentsListComponent implements OnInit {
   private readonly notification = inject(NotificationService);
 
   readonly pageSize = PAGE_SIZE;
+  readonly appointmentStatusClass = appointmentStatusClass;
 
   readonly scheduledAppointments = signal<AppointmentResponse[]>([]);
   readonly scheduledPageIndex = signal(0);

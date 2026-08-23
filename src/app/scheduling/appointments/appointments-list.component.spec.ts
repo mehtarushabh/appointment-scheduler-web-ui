@@ -183,6 +183,23 @@ describe('AppointmentsListComponent', () => {
     expect(fixture.componentInstance.scheduledAppointments()).toEqual([]);
   });
 
+  describe('status color (feature 014)', () => {
+    it('colors a CANCELLED status word red and a COMPLETED one green, in the Past table, and leaves a SCHEDULED one uncolored in the Scheduled table', () => {
+      const fixture = setup(
+        'CLINIC_ADMIN',
+        [appointment({ id: 'scheduled-1', state: 'SCHEDULED' })],
+        [appointment({ id: 'cancelled-1', state: 'CANCELLED' }), appointment({ id: 'completed-1', state: 'COMPLETED' })]
+      );
+
+      const statusSpans = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('td span'));
+      const findByText = (text: string) => statusSpans.find((span) => span.textContent?.trim() === text);
+
+      expect(findByText('SCHEDULED')?.className).toBe('');
+      expect(findByText('CANCELLED')?.className).toBe('app-status-cancelled');
+      expect(findByText('COMPLETED')?.className).toBe('app-status-completed');
+    });
+  });
+
   describe('paging (feature 013)', () => {
     it("requests only the next page of the Scheduled table when its paginator advances, leaving the Past table's page untouched", () => {
       const fixture = setup('CLINIC_ADMIN', [appointment({ id: '1' })], [appointment({ id: '2', state: 'COMPLETED' })]);

@@ -45,18 +45,6 @@
         <tr mat-row *matRowDef="let clinic; columns: displayedColumns" (click)="toggle(clinic)"></tr>
         <tr mat-row *matRowDef="let clinic; columns: ['expandedDetail']" [hidden]="!isExpanded(clinic)"></tr>
       </table>
-
-      <!--
-        Feature 008 (research.md #5): visual-only pagination footer matching the reference mockup.
-        The range always reflects the full (unpaginated) result set, and prev/next are always
-        disabled — there is no MatPaginator behind them, since real pagination isn't part of this
-        app today and adding it would be a functional change out of this restyle's scope.
-      -->
-      <div class="app-pagination-footer">
-        <span class="app-pagination-range">1 - {{ clinics().length }} of {{ clinics().length }}</span>
-        <button mat-icon-button disabled aria-label="Previous page"><fa-icon [icon]="faAngleLeft" /></button>
-        <button mat-icon-button disabled aria-label="Next page"><fa-icon [icon]="faAngleRight" /></button>
-      </div>
     }
   </mat-card>
 </div>
