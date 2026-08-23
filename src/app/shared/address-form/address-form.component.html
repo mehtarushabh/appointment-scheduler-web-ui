@@ -1,12 +1,30 @@
 <div [formGroup]="group">
   <mat-form-field appearance="outline">
+    <mat-label>Country</mat-label>
+    <mat-select formControlName="country">
+      @for (country of countries; track country.code) {
+        <mat-option [value]="country.name">{{ country.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
     <mat-label>Address line 1</mat-label>
-    <input matInput formControlName="addressLine1" />
+    <input matInput formControlName="addressLine1" [matAutocomplete]="addressLine1Auto" />
+    <mat-autocomplete
+      #addressLine1Auto="matAutocomplete"
+      [displayWith]="displayPrediction"
+      (optionSelected)="selectSuggestion($event)"
+    >
+      @for (prediction of addressLine1Predictions(); track prediction.place_id) {
+        <mat-option [value]="prediction">{{ prediction.description }}</mat-option>
+      }
+    </mat-autocomplete>
   </mat-form-field>
 
   <mat-form-field appearance="outline">
     <mat-label>Address line 2</mat-label>
-    <input matInput formControlName="addressLine2" />
+    <input matInput formControlName="addressLine2" placeholder="Optional" />
   </mat-form-field>
 
   <div class="app-field-row">
@@ -23,11 +41,6 @@
     <mat-form-field appearance="outline">
       <mat-label>Zip</mat-label>
       <input matInput formControlName="zip" />
-    </mat-form-field>
-
-    <mat-form-field appearance="outline">
-      <mat-label>Country</mat-label>
-      <input matInput formControlName="country" />
     </mat-form-field>
   </div>
 </div>
