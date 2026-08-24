@@ -61,6 +61,9 @@ export class BookAppointmentComponent implements OnInit {
   readonly availableStartTimes = signal<string[]>([]);
   readonly selectedStartTime = signal<string | null>(null);
 
+  /** Feature 016 FR-020: set when booking is blocked specifically by an incomplete profile, so the template can offer a direct link to fix it. */
+  readonly blockedByIncompleteProfile = signal(false);
+
   readonly dateFilter = (date: Date | null): boolean => {
     if (!date) {
       return false;
@@ -128,6 +131,7 @@ export class BookAppointmentComponent implements OnInit {
       return;
     }
 
+    this.blockedByIncompleteProfile.set(false);
     this.appointmentService
       .bookAppointment({ clinicId, doctorId, date: toDateOnlyString(date), startTime, durationMinutes: this.selectedDuration() })
       .subscribe({
@@ -135,8 +139,19 @@ export class BookAppointmentComponent implements OnInit {
           this.notification.success('Appointment booked successfully.');
           this.router.navigateByUrl('/home');
         },
-        error: (err) => this.notification.error(err?.error?.message ?? 'Failed to book appointment.'),
+        error: (err) => {
+          const message: string | undefined = err?.error?.message;
+          this.notification.error(message ?? 'Failed to book appointment.');
+          // Distinguish from the *other* 403 this endpoint can return ("not associated with this
+          // clinic") by message content, not status alone — only this specific message means "go
+          // finish your profile" is the right next action.
+          this.blockedByIncompleteProfile.set(message === 'Your profile must be fully complete before you can schedule an appointment.');
+        },
       });
+  }
+
+  goToEditProfile(): void {
+    this.router.navigateByUrl('/edit-profile');
   }
 
   private resetDateAndTime(): void {

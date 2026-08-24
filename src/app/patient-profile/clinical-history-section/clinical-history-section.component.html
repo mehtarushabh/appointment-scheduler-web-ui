@@ -1,0 +1,75 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-card-content>
+    <h3>Current medications</h3>
+    @for (medication of medications.controls; track $index) {
+      <div [formGroup]="medication">
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Dosage</mat-label>
+          <input matInput formControlName="dosage" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Frequency</mat-label>
+          <input matInput formControlName="frequency" />
+        </mat-form-field>
+        <button mat-button type="button" (click)="removeMedication($index)">Remove</button>
+      </div>
+    }
+    @if (medications.length === 0) {
+      <p>No current medications.</p>
+    }
+    <button mat-button type="button" (click)="addMedication()">Add medication</button>
+
+    <h3>Known allergies &amp; adverse reactions</h3>
+    @for (allergy of allergies.controls; track $index) {
+      <div [formGroup]="allergy">
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category">
+            @for (option of allergyCategoryOptions; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <input matInput formControlName="description" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Severity</mat-label>
+          <mat-select formControlName="severity">
+            @for (option of allergySeverityOptions; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-button type="button" (click)="removeAllergy($index)">Remove</button>
+      </div>
+    }
+    @if (allergies.length === 0) {
+      <p>No known allergies.</p>
+    }
+    <button mat-button type="button" (click)="addAllergy()">Add allergy</button>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Personal medical history</mat-label>
+      <textarea matInput formControlName="personalMedicalHistory"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Family medical history</mat-label>
+      <textarea matInput formControlName="familyMedicalHistory"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Preferred pharmacy name</mat-label>
+      <input matInput formControlName="preferredPharmacyName" />
+    </mat-form-field>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button type="submit" [disabled]="form.invalid">Save clinical history</button>
+  </mat-card-actions>
+</form>

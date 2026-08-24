@@ -53,3 +53,42 @@ describe('role-based /home dispatch', () => {
     }
   );
 });
+
+/**
+ * Feature 016: `doctor/patients` moved from a `ComingSoonComponent` placeholder to a real,
+ * role-guarded screen, and there is deliberately no separate "patient-profile" route — Sections
+ * 2-5 live on `edit-profile` instead (see edit-profile.component.spec.ts). Guard-level unit tests
+ * alone wouldn't catch a route wired to the wrong component or missing a guard entirely — this
+ * exercises real navigation through the real route config, the same regression class as the /home
+ * suite above.
+ */
+describe('Feature 016 routes', () => {
+  function sessionFor(role: UserRole): AuthSession {
+    return { token: 'jwt', role, clinicId: null, firstName: 'Ada', lastName: 'Admin', clinicName: null };
+  }
+
+  function setup(role: UserRole) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        {
+          provide: AuthService,
+          useValue: { currentUser: () => sessionFor(role), isAuthenticated: () => true },
+        },
+      ],
+    });
+    return TestBed.inject(Router);
+  }
+
+  it('lets a Doctor reach /doctor/patients now that it is a real screen, not the coming-soon placeholder', async () => {
+    const router = setup('DOCTOR');
+    await router.navigateByUrl('/doctor/patients');
+    expect(router.url).toBe('/doctor/patients');
+  });
+
+  it('no longer registers a separate /patient-profile route — a Patient falls through to the wildcard redirect', async () => {
+    const router = setup('PATIENT');
+    await router.navigateByUrl('/patient-profile');
+    expect(router.url).not.toBe('/patient-profile');
+  });
+});

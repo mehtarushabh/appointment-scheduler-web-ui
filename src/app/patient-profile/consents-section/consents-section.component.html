@@ -1,0 +1,35 @@
+<div>
+  @for (status of consentStatuses; track status.documentType) {
+    <mat-card class="app-section">
+      <mat-card-content>
+        <h4>
+          {{ status.title }}
+          — {{ status.accepted ? 'Accepted (' + status.acceptedVersion + ')' : 'Not yet accepted' }}
+        </h4>
+
+        @if (!hasBeenViewed(status)) {
+          <button mat-button type="button" [disabled]="isLoading(status)" (click)="viewDocument(status)">
+            {{ isLoading(status) ? 'Loading...' : 'View document' }}
+          </button>
+        } @else {
+          <div class="app-consent-document-text">
+            @for (paragraph of paragraphsFor(status); track $index) {
+              <p>{{ paragraph }}</p>
+            }
+          </div>
+
+          <form [formGroup]="signatureForm">
+            <mat-form-field appearance="outline">
+              <mat-label>Type your full name to sign</mat-label>
+              <input matInput formControlName="signatureText" />
+            </mat-form-field>
+          </form>
+
+          <button mat-flat-button type="button" [disabled]="!canAccept(status)" (click)="accept(status)">
+            Accept {{ status.title }}
+          </button>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

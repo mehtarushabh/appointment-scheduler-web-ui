@@ -1,6 +1,13 @@
 <div class="app-page">
   <h1>Welcome back</h1>
 
+  @if (profileIncomplete()) {
+    <p role="alert">
+      Your profile is incomplete.
+      <button mat-button type="button" (click)="goToEditProfile()">Complete now</button>
+    </p>
+  }
+
   @if (upcoming().length === 0) {
     <p>No appointments yet. Use "Schedule appointment" above to book one.</p>
   } @else {

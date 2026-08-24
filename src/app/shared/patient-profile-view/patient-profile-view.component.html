@@ -1,0 +1,69 @@
+<div class="app-patient-profile-view">
+  <p [attr.role]="'status'">
+    Profile status: {{ profile.profileComplete ? 'Complete' : 'Incomplete' }}
+  </p>
+
+  <h4>Demographics</h4>
+  <p>{{ profile.firstName }} {{ profile.lastName }}</p>
+  <p>Email: {{ profile.email }}</p>
+  <p>Date of birth: {{ profile.dateOfBirth }}</p>
+  <p>Biological sex: {{ profile.biologicalSex ?? 'Not yet provided' }}</p>
+  <p>Personal phone: {{ profile.personalPhone ?? 'Not yet provided' }}</p>
+  <p>
+    {{ profile.address.addressLine1 }}
+    @if (profile.address.addressLine2) {
+      , {{ profile.address.addressLine2 }}
+    }
+    , {{ profile.address.city }}, {{ profile.address.state }} {{ profile.address.zip }}, {{ profile.address.country }}
+  </p>
+
+  <h4>Emergency Contact</h4>
+  @if (profile.emergencyContact?.contactFullName) {
+    <p>{{ profile.emergencyContact!.contactFullName }} ({{ profile.emergencyContact!.relationship }})</p>
+    <p>{{ profile.emergencyContact!.primaryPhone }}</p>
+  } @else {
+    <p>Not yet provided.</p>
+  }
+
+  <h4>Insurance &amp; Financial Responsibility</h4>
+  @if (profile.insurance?.insuranceName) {
+    <p>{{ profile.insurance!.insuranceName }} — Member ID {{ profile.insurance!.memberId }}</p>
+    <p>Policyholder: {{ profile.insurance!.policyholderName }} ({{ profile.insurance!.policyholderRelationship }})</p>
+  } @else {
+    <p>Not yet provided.</p>
+  }
+
+  <h4>Clinical History &amp; Health Intake</h4>
+  @if (profile.clinicalHistory) {
+    <p>Medications:</p>
+    @if (profile.clinicalHistory.medications.length === 0) {
+      <p>None.</p>
+    } @else {
+      <ul>
+        @for (medication of profile.clinicalHistory.medications; track medication.name) {
+          <li>{{ medication.name }} — {{ medication.dosage }}, {{ medication.frequency }}</li>
+        }
+      </ul>
+    }
+    <p>Allergies:</p>
+    @if (profile.clinicalHistory.allergies.length === 0) {
+      <p>None.</p>
+    } @else {
+      <ul>
+        @for (allergy of profile.clinicalHistory.allergies; track allergy.description) {
+          <li>{{ allergy.description }} ({{ allergy.category }}, {{ allergy.severity }})</li>
+        }
+      </ul>
+    }
+    <p>Personal medical history: {{ profile.clinicalHistory.personalMedicalHistory ?? 'Not yet provided' }}</p>
+    <p>Family medical history: {{ profile.clinicalHistory.familyMedicalHistory ?? 'Not yet provided' }}</p>
+    <p>Preferred pharmacy: {{ profile.clinicalHistory.preferredPharmacyName ?? 'Not yet provided' }}</p>
+  } @else {
+    <p>Not yet provided.</p>
+  }
+
+  <h4>Legal Consents</h4>
+  @for (status of profile.consentStatuses; track status.documentType) {
+    <p>{{ status.title }}: {{ status.accepted ? 'Accepted (' + status.acceptedVersion + ')' : 'Not yet accepted' }}</p>
+  }
+</div>

@@ -9,16 +9,16 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '../../../shared/address-form/address-form.component';
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { PatientOnboardingService } from '../patient-onboarding.service';
-import { UserOnboardingRequest, UserResponse } from '../../../shared/models';
+import { PatientOnboardingRequest, UserResponse } from '../../../shared/models';
 
 /**
- * Two-step "Add a new patient" pop-up (Feature 006 US2), structurally mirroring
- * `AddDoctorDialogComponent` (Feature 005): a fields step, then a read-only confirm step the
- * Clinic Admin must explicitly confirm before the patient is actually created or linked (FR-007,
- * FR-007a). Both steps share one form instance, so "back" never loses entered values, and a
- * failure after "Confirm" returns to the fields step with those same values intact (FR-009).
- * `onboardOrLinkPatient` resolves identically whether the server created a new Patient or linked
- * an existing one from another clinic (research.md #4) — no special-casing needed here.
+ * Email-first "Add a new patient" pop-up (Feature 016 FR-001–FR-006), replacing Feature 006's
+ * single all-fields-then-confirm flow. Four steps sharing one dialog instance:
+ * `email` (only field required to start) → either `match` (an existing Patient was found by
+ * email — Confirm just links them, no re-entry, FR-002/FR-003) or `fields` (no match — First
+ * Name/Last Name/Date of Birth/Address only; Biological Sex/Personal Phone are never collected
+ * here, FR-005/FR-007) → `confirm` (review before creating). A 409 (email belongs to a
+ * non-Patient account, FR-006) is shown inline on the `email` step without advancing.
  */
 @Component({
   selector: 'app-add-patient-dialog',
@@ -44,46 +44,87 @@ export class AddPatientDialogComponent {
   private readonly notification = inject(NotificationService);
   private readonly dialogRef = inject(MatDialogRef<AddPatientDialogComponent, UserResponse>);
 
-  readonly step = signal<'fields' | 'confirm'>('fields');
+  readonly step = signal<'email' | 'match' | 'fields' | 'confirm'>('email');
+  readonly matchedPatient = signal<UserResponse | null>(null);
+  readonly lookupErrorMessage = signal<string | null>(null);
 
-  readonly form = this.fb.group({
+  readonly emailForm = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+  });
+
+  readonly detailsForm = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
     dateOfBirth: ['', Validators.required],
     address: createAddressFormGroup(this.fb),
   });
 
-  /** Read-only, typed view of the form's current values for the confirm step's summary. */
+  /** Read-only, typed view of the fields form's current values for the confirm step's summary. */
   get summary() {
-    const value = this.form.getRawValue();
+    const value = this.detailsForm.getRawValue();
     return { ...value, address: value.address as AddressFormValue };
   }
 
+  lookupEmail(): void {
+    if (this.emailForm.invalid) {
+      return;
+    }
+    this.lookupErrorMessage.set(null);
+    const email = this.emailForm.getRawValue().email!;
+
+    this.patientOnboardingService.lookupPatient(email).subscribe({
+      next: (found) => {
+        if (found) {
+          this.matchedPatient.set(found);
+          this.step.set('match');
+        } else {
+          this.step.set('fields');
+        }
+      },
+      error: (err) => this.lookupErrorMessage.set(err?.error?.message ?? 'Failed to look up this email.'),
+    });
+  }
+
   next(): void {
-    if (this.form.invalid) {
+    if (this.detailsForm.invalid) {
       return;
     }
     this.step.set('confirm');
   }
 
   back(): void {
-    this.step.set('fields');
+    if (this.step() === 'confirm') {
+      this.step.set('fields');
+    } else {
+      this.step.set('email');
+    }
   }
 
   cancel(): void {
     this.dialogRef.close();
   }
 
+  /** FR-003: the matched Patient is linked with no re-entry of their information — only email is sent. */
+  confirmLink(): void {
+    const email = this.emailForm.getRawValue().email!;
+    this.patientOnboardingService.onboardOrLinkPatient({ email }).subscribe({
+      next: (patient) => {
+        this.notification.success(`${patient.firstName} ${patient.lastName} added to this clinic.`);
+        this.dialogRef.close(patient);
+      },
+      error: (err) => this.notification.error(err?.error?.message ?? 'Failed to add this patient to the clinic.'),
+    });
+  }
+
   confirm(): void {
-    if (this.form.invalid) {
+    if (this.detailsForm.invalid) {
       return;
     }
-    const value = this.form.getRawValue();
-    const request: UserOnboardingRequest = {
+    const value = this.detailsForm.getRawValue();
+    const request: PatientOnboardingRequest = {
+      email: this.emailForm.getRawValue().email!,
       firstName: value.firstName!,
       lastName: value.lastName!,
-      email: value.email!,
       dateOfBirth: value.dateOfBirth!,
       address: value.address as AddressFormValue,
     };

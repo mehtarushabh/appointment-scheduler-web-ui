@@ -1,7 +1,46 @@
-@if (step() === 'fields') {
+@if (step() === 'email') {
   <h2 mat-dialog-title>Add a new patient</h2>
   <div mat-dialog-content>
-    <form [formGroup]="form">
+    <form [formGroup]="emailForm">
+      <mat-form-field appearance="outline">
+        <mat-label>Patient email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+    </form>
+    @if (lookupErrorMessage()) {
+      <p role="alert">{{ lookupErrorMessage() }}</p>
+    }
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancel()">Cancel</button>
+    <button mat-flat-button [disabled]="emailForm.invalid" (click)="lookupEmail()">Next</button>
+  </div>
+} @else if (step() === 'match') {
+  <h2 mat-dialog-title>Patient found</h2>
+  <div mat-dialog-content>
+    @let found = matchedPatient();
+    @if (found) {
+      <p>This patient already exists in the system, click Confirm to add this patient to this clinic.</p>
+      <p>{{ found.firstName }} {{ found.lastName }}</p>
+      <p>Date of birth: {{ found.dateOfBirth }}</p>
+      <p>
+        {{ found.address.addressLine1 }}
+        @if (found.address.addressLine2) {
+          , {{ found.address.addressLine2 }}
+        }
+        , {{ found.address.city }}, {{ found.address.state }} {{ found.address.zip }}, {{ found.address.country }}
+      </p>
+    }
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cancel()">Cancel</button>
+    <button mat-button (click)="back()">Back</button>
+    <button mat-flat-button (click)="confirmLink()">Confirm</button>
+  </div>
+} @else if (step() === 'fields') {
+  <h2 mat-dialog-title>New patient details</h2>
+  <div mat-dialog-content>
+    <form [formGroup]="detailsForm">
       <mat-form-field appearance="outline">
         <mat-label>First name</mat-label>
         <input matInput formControlName="firstName" />
@@ -13,30 +52,26 @@
       </mat-form-field>
 
       <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput type="email" formControlName="email" />
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
         <mat-label>Date of birth</mat-label>
         <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" />
         <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
         <mat-datepicker #dobPicker />
       </mat-form-field>
 
-      <app-address-form [group]="form.controls.address" />
+      <app-address-form [group]="detailsForm.controls.address" />
     </form>
   </div>
   <div mat-dialog-actions>
     <button mat-button (click)="cancel()">Cancel</button>
-    <button mat-flat-button [disabled]="form.invalid" (click)="next()">Next</button>
+    <button mat-button (click)="back()">Back</button>
+    <button mat-flat-button [disabled]="detailsForm.invalid" (click)="next()">Next</button>
   </div>
 } @else {
   <h2 mat-dialog-title>Confirm new patient</h2>
   <div mat-dialog-content>
     @let value = summary;
     <p>{{ value.firstName }} {{ value.lastName }}</p>
-    <p>Email: {{ value.email }}</p>
+    <p>Email: {{ emailForm.getRawValue().email }}</p>
     <p>Date of birth: {{ value.dateOfBirth }}</p>
     <p>
       {{ value.address.addressLine1 }}

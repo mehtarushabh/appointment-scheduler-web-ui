@@ -1,59 +1,117 @@
-<form class="app-form-wide" [formGroup]="form" (ngSubmit)="save()">
-  <h2>Edit profile</h2>
+<h2>Edit profile</h2>
 
-  <mat-card class="app-section">
-    <mat-card-content>
-      <mat-form-field appearance="outline">
-        <mat-label>First name</mat-label>
-        <input matInput formControlName="firstName" />
-      </mat-form-field>
+@if (isPatient()) {
+  @if (profile(); as p) {
+    @if (p.profileComplete) {
+      <p role="status">Your profile is fully complete. You can schedule appointments.</p>
+    } @else {
+      <p role="status">Complete every section below to become eligible to schedule appointments.</p>
+    }
 
-      <mat-form-field appearance="outline">
-        <mat-label>Last name</mat-label>
-        <input matInput formControlName="lastName" />
-      </mat-form-field>
+    <div class="app-profile-sections">
+      <nav class="app-profile-section-list">
+        @for (section of sections(); track section.id) {
+          <button
+            type="button"
+            class="app-profile-section-list-item"
+            [class.app-profile-section-selected]="selectedSection() === section.id"
+            [attr.aria-pressed]="selectedSection() === section.id"
+            (click)="selectSection(section.id)"
+          >
+            <span>{{ section.label }}</span>
+            @if (section.complete) {
+              <fa-icon [icon]="faCircleCheck" class="app-profile-section-complete" aria-label="Complete" />
+            }
+          </button>
+        }
+      </nav>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Email</mat-label>
-        <input matInput [value]="email()" readonly disabled />
-      </mat-form-field>
+      <div class="app-profile-section-detail">
+        @switch (selectedSection()) {
+          @case ('basicInformation') {
+            <ng-container [ngTemplateOutlet]="basicInformationForm" />
+          }
+          @case ('emergencyContact') {
+            <app-emergency-contact-section [emergencyContact]="p.emergencyContact" (sectionSaved)="onSectionSaved($event)" />
+          }
+          @case ('insurance') {
+            <app-insurance-section
+              [insurance]="p.insurance"
+              [patientName]="p.firstName + ' ' + p.lastName"
+              [patientDateOfBirth]="p.dateOfBirth"
+              [patientBiologicalSex]="p.biologicalSex"
+              (sectionSaved)="onSectionSaved($event)"
+            />
+          }
+          @case ('clinicalHistory') {
+            <app-clinical-history-section [clinicalHistory]="p.clinicalHistory" (sectionSaved)="onSectionSaved($event)" />
+          }
+          @case ('consents') {
+            <app-consents-section [consentStatuses]="p.consentStatuses" (sectionSaved)="onSectionSaved($event)" />
+          }
+        }
+      </div>
+    </div>
+  }
+} @else {
+  <h3>Basic Information</h3>
+  <ng-container [ngTemplateOutlet]="basicInformationForm" />
+}
 
-      <mat-form-field appearance="outline">
-        <mat-label>Date of birth</mat-label>
-        <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" />
-        <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
-        <mat-datepicker #dobPicker />
-      </mat-form-field>
-
-      @if (isDoctor()) {
+<ng-template #basicInformationForm>
+  <form class="app-form-wide" [formGroup]="form" (ngSubmit)="save()">
+    <mat-card class="app-section">
+      <mat-card-content>
         <mat-form-field appearance="outline">
-          <mat-label>Specialty</mat-label>
-          <input matInput formControlName="specialty" />
-        </mat-form-field>
-      }
-
-      <app-address-form [group]="form.controls.address" />
-
-      @if (isPatient()) {
-        <h3>Insurance</h3>
-        <mat-form-field appearance="outline">
-          <mat-label>Insurance name</mat-label>
-          <input matInput formControlName="insuranceName" />
+          <mat-label>First name</mat-label>
+          <input matInput formControlName="firstName" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Group ID</mat-label>
-          <input matInput formControlName="groupId" />
+          <mat-label>Last name</mat-label>
+          <input matInput formControlName="lastName" />
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Member ID</mat-label>
-          <input matInput formControlName="memberId" />
+          <mat-label>Email</mat-label>
+          <input matInput [value]="email()" readonly disabled />
         </mat-form-field>
-      }
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-flat-button type="submit" [disabled]="form.invalid">Save profile</button>
-    </mat-card-actions>
-  </mat-card>
-</form>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Date of birth</mat-label>
+          <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth" />
+          <mat-datepicker-toggle matIconSuffix [for]="dobPicker" />
+          <mat-datepicker #dobPicker />
+        </mat-form-field>
+
+        @if (isDoctor()) {
+          <mat-form-field appearance="outline">
+            <mat-label>Specialty</mat-label>
+            <input matInput formControlName="specialty" />
+          </mat-form-field>
+        }
+
+        <app-address-form [group]="form.controls.address" />
+
+        @if (isPatient()) {
+          <mat-form-field appearance="outline">
+            <mat-label>Biological sex</mat-label>
+            <mat-select formControlName="biologicalSex">
+              @for (option of biologicalSexOptions; track option) {
+                <mat-option [value]="option">{{ option }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Personal phone</mat-label>
+            <input matInput formControlName="personalPhone" />
+          </mat-form-field>
+        }
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-flat-button type="submit" [disabled]="form.invalid">Save profile</button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+</ng-template>

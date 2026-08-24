@@ -1,14 +1,18 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { AuthService, UserRole } from '../auth.service';
+import { ProfileService } from '../../shared/profile/profile.service';
+import { ProfileCompletionStatusService } from '../../shared/profile/profile-completion-status.service';
 
 interface NavLink {
   label: string;
   path: string;
 }
+
+const SCHEDULE_APPOINTMENT_PATH = '/schedule-appointment';
 
 /** FR-005: nav links after the title, scoped to the logged-in user's role. */
 const ROLE_NAV_LINKS: Record<UserRole, NavLink[]> = {
@@ -25,7 +29,7 @@ const ROLE_NAV_LINKS: Record<UserRole, NavLink[]> = {
     { label: 'Appointments', path: '/appointments' },
   ],
   PATIENT: [
-    { label: 'Schedule appointment', path: '/schedule-appointment' },
+    { label: 'Schedule appointment', path: SCHEDULE_APPOINTMENT_PATH },
     { label: 'Appointments', path: '/appointments' },
   ],
 };
@@ -46,9 +50,34 @@ const ROLE_NAV_LINKS: Record<UserRole, NavLink[]> = {
 export class AppShellComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly profileService = inject(ProfileService);
+  private readonly profileCompletionStatus = inject(ProfileCompletionStatusService);
+
+  /** Special-cased in the template so it can render disabled instead of navigable (Feature 016 FR-019/FR-020). */
+  readonly scheduleAppointmentPath = SCHEDULE_APPOINTMENT_PATH;
 
   /** FR-014: nobody is logged in yet (e.g. the login screen) — just the title, nothing else. */
   readonly loggedIn = this.auth.isAuthenticated;
+
+  /**
+   * Feature 016 FR-019/FR-020: a Patient whose profile is positively known to be incomplete can't
+   * start the scheduling flow at all, not just get rejected at the final confirm step. `=== false`
+   * specifically — `null` (not yet fetched) never disables, so the link doesn't flash disabled for
+   * a complete Patient while the fetch is still in flight; the server remains the real gate either way.
+   */
+  readonly scheduleAppointmentDisabled = computed(
+    () => this.auth.currentUser()?.role === 'PATIENT' && this.profileCompletionStatus.profileComplete() === false
+  );
+
+  /** Keeps profileCompletionStatus in sync with the logged-in Patient, and clears it on logout/role change. */
+  private readonly syncProfileCompletion = effect(() => {
+    const user = this.auth.currentUser();
+    if (user?.role === 'PATIENT') {
+      this.profileService.getMyProfile().subscribe((profile) => this.profileCompletionStatus.set(profile.profileComplete));
+    } else {
+      this.profileCompletionStatus.reset();
+    }
+  });
 
   /** FR-002/FR-014: "Appointment scheduler" for System Admin/Patient/guests, the clinic name otherwise. */
   readonly title = computed(() => {

@@ -20,6 +20,8 @@ function clinic(overrides: Partial<ClinicResponse>): ClinicResponse {
       role: 'CLINIC_ADMIN',
       clinicId: '1',
       specialty: null,
+      biologicalSex: null,
+      personalPhone: null,
     },
     ...overrides,
   };
@@ -73,6 +75,14 @@ describe('SystemAdminHomeComponent', () => {
 
     expect(fixture.componentInstance.isExpanded(c1)).toBe(true);
     expect(fixture.componentInstance.isExpanded(c2)).toBe(true);
+  });
+
+  it('marks each clickable row with the shared hover-cursor class (Feature 018 FR-004)', () => {
+    const fixture = setup([clinic({ id: '1' })]);
+
+    const row = (fixture.nativeElement as HTMLElement).querySelector('tr.app-clickable-row');
+
+    expect(row).toBeTruthy();
   });
 
   it('shows a clear empty-state message when there are no clinics registered yet', () => {

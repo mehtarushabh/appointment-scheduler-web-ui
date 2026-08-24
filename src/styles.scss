@@ -128,6 +128,14 @@ form.app-form-wide {
   flex: 1 1 140px;
 }
 
+// Feature 018 (constitution v1.6.0, Principle III): a table row with its own click behavior (e.g.
+// expanding inline to reveal further detail) must show a pointer/hand cursor on hover, so its
+// interactivity is visible before the user clicks — applied per-component to just the `<tr
+// mat-row>` that actually has a click handler, never to a whole table indiscriminately.
+.app-clickable-row {
+  cursor: pointer;
+}
+
 // Consistent spacing between a page's title and the card(s)/table below it. Bugfix: this header
 // sits directly inside a `mat-card` (not wrapped in `mat-card-content`, which is the only element
 // Material's own stylesheet adds padding around) on every list screen that uses it (doctors,

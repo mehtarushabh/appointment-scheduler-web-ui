@@ -1,29 +1,25 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
-import { PatientOnboardingService } from './patient-onboarding.service';
-import { AddPatientDialogComponent } from './add-patient-dialog/add-patient-dialog.component';
+import { PatientOnboardingService } from '../../onboarding/patient-onboarding/patient-onboarding.service';
 import { PatientProfileViewComponent } from '../../shared/patient-profile-view/patient-profile-view.component';
 import { PatientProfileView, UserResponse } from '../../shared/models';
 
 /**
- * Clinic Admin's table of their own clinic's patients (Feature 001 US3; row-expansion and the
- * "Add a new patient" pop-up are Feature 006, FR-003/FR-005). Feature 016 FR-024: expanding a row
- * now fetches and shows that patient's whole profile (Sections 1-5), not just the basic fields
- * already in the list response — reusing the same read-only view the Doctor's Patients page uses.
+ * A Doctor's table of their own clinic's patients (Feature 016 FR-024), replacing the
+ * `ComingSoonComponent` placeholder that stood in for this screen since routing was first laid
+ * out. Reuses {@link PatientListComponent}'s row-expansion pattern; on first expand, fetches and
+ * caches that patient's full read-only profile via the same endpoint the Clinic Admin's Patients
+ * page uses.
  */
 @Component({
-  selector: 'app-patient-list',
+  selector: 'app-doctor-patient-list',
   standalone: true,
-  imports: [MatTableModule, MatButtonModule, MatCardModule, PatientProfileViewComponent],
-  templateUrl: './patient-list.component.html',
-  styleUrl: './patient-list.component.scss',
+  imports: [MatTableModule, MatCardModule, PatientProfileViewComponent],
+  templateUrl: './doctor-patient-list.component.html',
 })
-export class PatientListComponent implements OnInit {
+export class DoctorPatientListComponent implements OnInit {
   private readonly patientOnboardingService = inject(PatientOnboardingService);
-  private readonly dialog = inject(MatDialog);
 
   readonly patients = signal<UserResponse[]>([]);
   readonly displayedColumns = ['name', 'email'];
@@ -43,7 +39,6 @@ export class PatientListComponent implements OnInit {
     return this.profiles().get(patient.id) ?? null;
   }
 
-  /** FR-003: each row expands/collapses independently — any number can be open at once. */
   toggle(patient: UserResponse): void {
     const next = new Set(this.expandedIds());
     if (next.has(patient.id)) {
@@ -61,16 +56,5 @@ export class PatientListComponent implements OnInit {
         this.profiles.set(nextProfiles);
       });
     }
-  }
-
-  openAddPatientDialog(): void {
-    this.dialog
-      .open(AddPatientDialogComponent)
-      .afterClosed()
-      .subscribe((patient) => {
-        if (patient) {
-          this.patients.update((patients) => [...patients, patient]);
-        }
-      });
   }
 }

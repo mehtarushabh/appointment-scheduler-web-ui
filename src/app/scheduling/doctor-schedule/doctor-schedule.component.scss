@@ -1,2 +1,15 @@
 // Feature 008: page header/card layout now comes from the shared .app-page/.app-page-header/
 // .app-section classes in styles.scss (research.md #2) instead of a component-local .header rule.
+
+// Feature 018 (research.md #1): the shared `.mat-mdc-card > .app-page-header` rule in styles.scss
+// doesn't match here — this screen's header sits directly under `.app-page` (there's no single
+// overarching card for it to belong to; "Upcoming leave" and "Past leave" are two separate cards),
+// so it falls back to default block layout instead of sitting beside "Add leave". Scoped locally
+// rather than broadening the shared selector, which would double the shared rule's padding onto
+// clinic-settings' identically-shaped header (research.md #1, #2) — that screen's own layout is
+// already correct today and must stay that way.
+.app-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

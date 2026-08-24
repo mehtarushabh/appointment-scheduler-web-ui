@@ -1,8 +1,10 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { PatientHomeComponent } from './patient-home.component';
 import { AppointmentService } from '../../scheduling/appointments/appointment.service';
 import { AppointmentResponse } from '../../shared/models';
+import { ProfileCompletionStatusService } from '../../shared/profile/profile-completion-status.service';
 
 function appointment(overrides: Partial<AppointmentResponse>): AppointmentResponse {
   return {
@@ -36,13 +38,17 @@ describe('PatientHomeComponent', () => {
     const searchMyAppointmentsSpy = vi.fn().mockReturnValue(
       of({ items: appointments, page: 0, size: 100, totalElements: appointments.length, totalPages: 1 })
     );
+    const navigateSpy = vi.fn();
     TestBed.configureTestingModule({
       imports: [PatientHomeComponent],
-      providers: [{ provide: AppointmentService, useValue: { searchMyAppointments: searchMyAppointmentsSpy } }],
+      providers: [
+        { provide: AppointmentService, useValue: { searchMyAppointments: searchMyAppointmentsSpy } },
+        { provide: Router, useValue: { navigateByUrl: navigateSpy } },
+      ],
     });
     const fixture = TestBed.createComponent(PatientHomeComponent);
     fixture.detectChanges();
-    return { fixture, searchMyAppointmentsSpy };
+    return { fixture, searchMyAppointmentsSpy, navigateSpy };
   }
 
   it('renders', () => {
@@ -97,5 +103,37 @@ describe('PatientHomeComponent', () => {
     const upcoming = fixture.componentInstance.upcoming();
     expect(upcoming.length).toBe(8);
     expect(upcoming.map((a) => a.id)).toEqual(['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7']);
+  });
+
+  // Feature 016 FR-019/FR-020: reads the shared completion cache the shell populates, rather than
+  // fetching GET /me/profile itself — see profile-completion-status.service.ts.
+  describe('incomplete-profile banner (Feature 016)', () => {
+    it('shows the banner and navigates to Edit Profile when "Complete now" is clicked', () => {
+      const { fixture, navigateSpy } = setup([]);
+      TestBed.inject(ProfileCompletionStatusService).set(false);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.profileIncomplete()).toBe(true);
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+      expect(text).toContain('Your profile is incomplete');
+
+      fixture.componentInstance.goToEditProfile();
+      expect(navigateSpy).toHaveBeenCalledWith('/edit-profile');
+    });
+
+    it('hides the banner once the profile is complete', () => {
+      const { fixture } = setup([]);
+      TestBed.inject(ProfileCompletionStatusService).set(true);
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.profileIncomplete()).toBe(false);
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+      expect(text).not.toContain('Your profile is incomplete');
+    });
+
+    it('hides the banner while completion status is not yet known', () => {
+      const { fixture } = setup([]);
+      expect(fixture.componentInstance.profileIncomplete()).toBe(false);
+    });
   });
 });

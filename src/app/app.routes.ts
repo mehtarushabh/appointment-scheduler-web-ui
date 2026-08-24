@@ -90,6 +90,8 @@ export const routes: Routes = [
           import('./core/change-password/change-password.component').then((m) => m.ChangePasswordComponent),
       },
       {
+        // Feature 016: also hosts a Patient's Sections 2-5 (Emergency Contact, Insurance, Clinical
+        // History, Legal Consents) below Section 1 — there is no separate "Patient Profile" route.
         path: 'edit-profile',
         canMatch: [authGuard],
         loadComponent: () => import('./core/edit-profile/edit-profile.component').then((m) => m.EditProfileComponent),
@@ -121,12 +123,11 @@ export const routes: Routes = [
           import('./scheduling/book-appointment/book-appointment.component').then((m) => m.BookAppointmentComponent),
       },
       {
-        // A Doctor's own placeholder, kept distinct from the real Clinic-Admin-only `patients`
-        // route above (research.md #6).
+        // Feature 016 FR-024: was a ComingSoonComponent placeholder; now a real, server-backed
+        // list, kept distinct from the Clinic-Admin-only `patients` route above (research.md #6).
         path: 'doctor/patients',
         canMatch: [roleGuard('DOCTOR')],
-        loadComponent: () => import('./shared/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-        data: { featureName: 'Patients' },
+        loadComponent: () => import('./doctor/patients/doctor-patient-list.component').then((m) => m.DoctorPatientListComponent),
       },
     ],
   },

@@ -2,11 +2,10 @@
   <mat-card>
     <div class="app-page-header">
       <h1>Patients</h1>
-      <button mat-flat-button (click)="openAddPatientDialog()">Add a new patient</button>
     </div>
 
     @if (patients().length === 0) {
-      <p>No patients onboarded yet.</p>
+      <p>No patients at this clinic yet.</p>
     } @else {
       <table mat-table [dataSource]="patients()" multiTemplateDataRows>
         <ng-container matColumnDef="name">

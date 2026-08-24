@@ -1,8 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
 import { AppointmentService } from '../../scheduling/appointments/appointment.service';
 import { AppointmentResponse } from '../../shared/models';
 import { compareBySoonest, isWithinNextDays, toDateOnlyString } from '../../shared/date-utils';
+import { ProfileCompletionStatusService } from '../../shared/profile/profile-completion-status.service';
 
 /**
  * How many days ahead (inclusive of today) the Patient home dashboard previews (feature 010). Kept
@@ -26,11 +29,13 @@ const PATIENT_HOME_WINDOW_DAYS = 7;
 @Component({
   selector: 'app-patient-home',
   standalone: true,
-  imports: [MatCardModule],
+  imports: [MatCardModule, MatButtonModule],
   templateUrl: './patient-home.component.html',
 })
 export class PatientHomeComponent implements OnInit {
   private readonly appointmentService = inject(AppointmentService);
+  private readonly router = inject(Router);
+  private readonly profileCompletionStatus = inject(ProfileCompletionStatusService);
 
   private readonly appointments = signal<AppointmentResponse[]>([]);
 
@@ -39,6 +44,13 @@ export class PatientHomeComponent implements OnInit {
       .filter((a) => a.state === 'SCHEDULED' && isWithinNextDays(a.date, PATIENT_HOME_WINDOW_DAYS))
       .sort(compareBySoonest)
   );
+
+  /**
+   * Feature 016 FR-019: the shell already fetches this Patient's completion status (to gate the
+   * Schedule appointment nav link) into the same shared cache, so this reads it rather than
+   * fetching GET /me/profile a second time. `null` (not yet known) never shows the banner.
+   */
+  readonly profileIncomplete = computed(() => this.profileCompletionStatus.profileComplete() === false);
 
   ngOnInit(): void {
     const today = new Date();
@@ -52,5 +64,9 @@ export class PatientHomeComponent implements OnInit {
         size: 100,
       })
       .subscribe((response) => this.appointments.set(response.items));
+  }
+
+  goToEditProfile(): void {
+    this.router.navigateByUrl('/edit-profile');
   }
 }

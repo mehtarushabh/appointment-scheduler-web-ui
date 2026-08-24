@@ -1,0 +1,51 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-card-content>
+    <mat-form-field appearance="outline">
+      <mat-label>Insurance payer name</mat-label>
+      <input matInput formControlName="insuranceName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Policy / member ID</mat-label>
+      <input matInput formControlName="memberId" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Group number</mat-label>
+      <input matInput formControlName="groupId" />
+    </mat-form-field>
+
+    <mat-checkbox formControlName="hasNoGroupNumber">My plan has no group number</mat-checkbox>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Policyholder name</mat-label>
+      <input matInput formControlName="policyholderName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Policyholder relationship to patient</mat-label>
+      <mat-select formControlName="policyholderRelationship" (selectionChange)="onRelationshipChange($event.value)">
+        @for (option of relationshipOptions; track option) {
+          <mat-option [value]="option">{{ option }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Policyholder date of birth</mat-label>
+      <input matInput formControlName="policyholderDateOfBirth" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Policyholder biological sex</mat-label>
+      <mat-select formControlName="policyholderBiologicalSex">
+        @for (option of biologicalSexOptions; track option) {
+          <mat-option [value]="option">{{ option }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button type="submit" [disabled]="form.invalid">Save insurance</button>
+  </mat-card-actions>
+</form>

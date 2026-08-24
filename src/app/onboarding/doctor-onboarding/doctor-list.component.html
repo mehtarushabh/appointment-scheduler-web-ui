@@ -42,7 +42,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let doctor; columns: displayedColumns" (click)="toggle(doctor)"></tr>
+        <tr mat-row class="app-clickable-row" *matRowDef="let doctor; columns: displayedColumns" (click)="toggle(doctor)"></tr>
         <tr mat-row *matRowDef="let doctor; columns: ['expandedDetail']" [hidden]="!isExpanded(doctor)"></tr>
       </table>
     }

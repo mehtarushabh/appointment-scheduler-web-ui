@@ -17,6 +17,8 @@ function doctor(overrides: Partial<UserResponse>): UserResponse {
     role: 'DOCTOR',
     clinicId: 'clinic-1',
     specialty: 'Cardiology',
+    biologicalSex: null,
+    personalPhone: null,
     ...overrides,
   };
 }
@@ -63,6 +65,14 @@ describe('DoctorListComponent', () => {
 
     expect(fixture.componentInstance.isExpanded(d1)).toBe(true);
     expect(fixture.componentInstance.isExpanded(d2)).toBe(true);
+  });
+
+  it('marks each clickable row with the shared hover-cursor class (Feature 018 FR-003)', () => {
+    const { fixture } = setup([doctor({ id: '1' })]);
+
+    const row = (fixture.nativeElement as HTMLElement).querySelector('tr.app-clickable-row');
+
+    expect(row).toBeTruthy();
   });
 
   it('opens AddDoctorDialogComponent when "Add a new doctor" is triggered (FR-005)', () => {

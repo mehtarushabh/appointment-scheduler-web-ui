@@ -31,8 +31,9 @@ describe('ProfileService', () => {
       lastName: 'Userson',
       dateOfBirth: '1991-02-03',
       address: { addressLine1: '2 Oak Ave', addressLine2: null, city: 'Gotham', state: 'NJ', zip: '07001', country: 'USA' },
+      biologicalSex: null,
+      personalPhone: null,
       doctorDetails: null,
-      patientDetails: null,
     };
 
     service.updateMyProfile(request).subscribe();

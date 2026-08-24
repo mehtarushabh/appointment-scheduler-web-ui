@@ -1,0 +1,65 @@
+// 017-edit-profile-redesign: the section list sits beside the detail area on wider viewports (no
+// breakpoint-driven stacking — research.md #6, matching every other screen in this app, none of
+// which have deliberate responsive handling either) and wraps naturally via flexbox otherwise.
+.app-profile-sections {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.app-profile-section-list {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 260px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+// A plain button per entry (research.md #5) rather than a Material list component — no existing
+// component in this app maps onto "one item selected, plus an independent completion badge."
+.app-profile-section-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: none;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  background: none;
+  font: inherit;
+  color: var(--mat-sys-on-surface);
+  text-align: left;
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: var(--mat-sys-surface-container-high);
+  }
+}
+
+// Reuses the same color="accent"/--mat-sys-primary treatment already established for the shell's
+// active nav link (app-shell.component.scss's .app-nav-link-active: primary-colored text plus an
+// accent border) — no new selected-state color, just a left border instead of a bottom one, since
+// this is a vertical list rather than a horizontal nav bar.
+.app-profile-section-selected {
+  color: var(--mat-sys-primary);
+  font-weight: 500;
+  border-left: 3px solid var(--mat-sys-primary);
+  padding-left: calc(1rem - 3px);
+}
+
+// Reuses --app-sys-success (styles.scss, Feature 004's toast tokens) — Constitution Principle III
+// requires an existing semantic token before a new color is introduced.
+.app-profile-section-complete {
+  color: var(--app-sys-success);
+}
+
+.app-profile-section-detail {
+  flex: 1 1 420px;
+  min-width: 0;
+}

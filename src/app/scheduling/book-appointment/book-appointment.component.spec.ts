@@ -151,4 +151,40 @@ describe('BookAppointmentComponent', () => {
     expect(notificationServiceStub.error).toHaveBeenCalledWith('The requested time is no longer available.');
     expect(navigateSpy).not.toHaveBeenCalled();
   });
+
+  it('offers a direct link to complete the profile specifically when booking is blocked by an incomplete profile (Feature 016 FR-020)', () => {
+    const fixture = setup([clinic('clinic-1')]);
+    bookAppointmentSpy.mockReturnValue(
+      throwError(() => ({
+        status: 403,
+        error: { message: 'Your profile must be fully complete before you can schedule an appointment.' },
+      }))
+    );
+    fixture.componentInstance.selectDoctor('doc-1');
+    fixture.componentInstance.selectDate(new Date(2026, 7, 24));
+    fixture.componentInstance.selectDuration(30);
+    fixture.componentInstance.selectStartTime('09:00:00');
+
+    fixture.componentInstance.confirm();
+
+    expect(fixture.componentInstance.blockedByIncompleteProfile()).toBe(true);
+
+    fixture.componentInstance.goToEditProfile();
+    expect(navigateSpy).toHaveBeenCalledWith('/edit-profile');
+  });
+
+  it('does not offer the profile link for an unrelated 403 (not associated with this clinic)', () => {
+    const fixture = setup([clinic('clinic-1')]);
+    bookAppointmentSpy.mockReturnValue(
+      throwError(() => ({ status: 403, error: { message: 'You are not associated with this clinic.' } }))
+    );
+    fixture.componentInstance.selectDoctor('doc-1');
+    fixture.componentInstance.selectDate(new Date(2026, 7, 24));
+    fixture.componentInstance.selectDuration(30);
+    fixture.componentInstance.selectStartTime('09:00:00');
+
+    fixture.componentInstance.confirm();
+
+    expect(fixture.componentInstance.blockedByIncompleteProfile()).toBe(false);
+  });
 });

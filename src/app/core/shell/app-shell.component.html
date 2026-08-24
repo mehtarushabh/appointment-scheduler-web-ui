@@ -15,16 +15,20 @@
     </a>
 
     @for (link of navLinks(); track link.path) {
-      <a
-        mat-button
-        [routerLink]="link.path"
-        routerLinkActive
-        #linkActive="routerLinkActive"
-        [color]="linkActive.isActive ? 'accent' : undefined"
-        [class.app-nav-link-active]="linkActive.isActive"
-      >
-        {{ link.label }}
-      </a>
+      @if (link.path === scheduleAppointmentPath && scheduleAppointmentDisabled()) {
+        <button mat-button type="button" disabled>{{ link.label }}</button>
+      } @else {
+        <a
+          mat-button
+          [routerLink]="link.path"
+          routerLinkActive
+          #linkActive="routerLinkActive"
+          [color]="linkActive.isActive ? 'accent' : undefined"
+          [class.app-nav-link-active]="linkActive.isActive"
+        >
+          {{ link.label }}
+        </a>
+      }
     }
 
     <span class="app-shell-spacer"></span>

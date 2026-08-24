@@ -57,6 +57,13 @@
     }
   }
 
+  @if (blockedByIncompleteProfile()) {
+    <p role="alert">
+      Your profile must be fully complete before you can schedule an appointment.
+      <button mat-button type="button" (click)="goToEditProfile()">Complete your profile</button>
+    </p>
+  }
+
   <div class="app-confirm-bar">
     <button mat-flat-button [disabled]="!selectedStartTime()" (click)="confirm()">
       <fa-icon [icon]="faCircleCheck" /> Confirm
