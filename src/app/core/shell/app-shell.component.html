@@ -33,7 +33,14 @@
 
     <span class="app-shell-spacer"></span>
 
-    <button mat-button [matMenuTriggerFor]="userMenu">{{ userName() }}</button>
+    <button mat-button [matMenuTriggerFor]="userMenu">
+      @if (profilePhotoUrl()) {
+        <img [src]="profilePhotoUrl()" alt="" class="app-shell-avatar" />
+      } @else {
+        <span class="app-shell-avatar-placeholder" aria-hidden="true"></span>
+      }
+      {{ userName() }}
+    </button>
     <mat-menu #userMenu="matMenu">
       <button mat-menu-item routerLink="/edit-profile">Edit profile</button>
       <button mat-menu-item (click)="logout()">Logout</button>

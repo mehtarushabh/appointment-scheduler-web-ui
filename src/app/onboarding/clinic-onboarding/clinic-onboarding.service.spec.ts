@@ -29,6 +29,7 @@ describe('ClinicOnboardingService', () => {
         email: 'cara@example.com',
         dateOfBirth: '1985-05-05',
         address: { addressLine1: '2 Elm St', addressLine2: null, city: 'Riverside', state: 'CA', zip: '92501', country: 'USA' },
+        biologicalSex: 'FEMALE',
       },
     };
 

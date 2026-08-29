@@ -26,6 +26,7 @@ describe('DoctorOnboardingService', () => {
       dateOfBirth: '1988-01-01',
       specialty: 'Cardiology',
       address: { addressLine1: '1 Main St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
+      biologicalSex: 'FEMALE',
     };
 
     service.onboardDoctor(request).subscribe();

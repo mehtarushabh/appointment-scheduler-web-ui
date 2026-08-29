@@ -30,6 +30,15 @@
       </mat-form-field>
 
       <app-address-form [group]="form.controls.address" />
+
+      <mat-form-field appearance="outline">
+        <mat-label>Biological sex</mat-label>
+        <mat-select formControlName="biologicalSex">
+          @for (option of biologicalSexOptions; track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </form>
   </div>
   <div mat-dialog-actions>
@@ -44,6 +53,7 @@
     <p>Email: {{ value.email }}</p>
     <p>Date of birth: {{ value.dateOfBirth }}</p>
     <p>Specialty: {{ value.specialty }}</p>
+    <p>Biological sex: {{ value.biologicalSex }}</p>
     <p>
       {{ value.address.addressLine1 }}
       @if (value.address.addressLine2) {

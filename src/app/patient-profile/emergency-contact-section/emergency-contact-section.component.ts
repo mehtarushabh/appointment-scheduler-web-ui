@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { PatientProfileService } from '../patient-profile.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { EmergencyContactDetails, EmergencyContactRelationship, MyProfileResponse } from '../../shared/models';
+import { EmergencyContactDetails, EmergencyContactRelationship, PatientDetailsResponse } from '../../shared/models';
 
 /** Section 2 (Emergency Contact Information, FR-013) — a self-contained, independently-saved panel. */
 @Component({
@@ -22,7 +22,7 @@ export class EmergencyContactSectionComponent implements OnChanges {
   private readonly notification = inject(NotificationService);
 
   @Input() emergencyContact: EmergencyContactDetails | null = null;
-  @Output() readonly sectionSaved = new EventEmitter<MyProfileResponse>();
+  @Output() readonly sectionSaved = new EventEmitter<PatientDetailsResponse>();
 
   readonly relationshipOptions: EmergencyContactRelationship[] = ['SPOUSAL', 'PARENT', 'SIBLING', 'FRIEND', 'GUARDIAN', 'OTHER'];
 

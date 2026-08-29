@@ -3,14 +3,14 @@ import { of } from 'rxjs';
 import { ClinicalHistorySectionComponent } from './clinical-history-section.component';
 import { PatientProfileService } from '../patient-profile.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { MyProfileResponse } from '../../shared/models';
+import { PatientDetailsResponse } from '../../shared/models';
 
 describe('ClinicalHistorySectionComponent', () => {
   let updateClinicalHistorySpy: ReturnType<typeof vi.fn>;
   let notificationServiceStub: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    updateClinicalHistorySpy = vi.fn().mockReturnValue(of({} as MyProfileResponse));
+    updateClinicalHistorySpy = vi.fn().mockReturnValue(of({} as PatientDetailsResponse));
     notificationServiceStub = { success: vi.fn(), error: vi.fn() };
     TestBed.configureTestingModule({
       imports: [ClinicalHistorySectionComponent],
@@ -66,10 +66,10 @@ describe('ClinicalHistorySectionComponent', () => {
   });
 
   it('emits the updated profile on successful save', () => {
-    const updated = { firstName: 'Pat' } as MyProfileResponse;
+    const updated = { profileComplete: true } as PatientDetailsResponse;
     updateClinicalHistorySpy.mockReturnValue(of(updated));
     const fixture = TestBed.createComponent(ClinicalHistorySectionComponent);
-    const emitted: MyProfileResponse[] = [];
+    const emitted: PatientDetailsResponse[] = [];
     fixture.componentInstance.sectionSaved.subscribe((p) => emitted.push(p));
 
     fixture.componentInstance.save();

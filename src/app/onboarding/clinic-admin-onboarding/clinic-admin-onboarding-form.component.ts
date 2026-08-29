@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -9,7 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '../../shared/address-form/address-form.component';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { ClinicAdminOnboardingService } from './clinic-admin-onboarding.service';
-import { UserOnboardingRequest } from '../../shared/models';
+import { BiologicalSex, UserOnboardingRequest } from '../../shared/models';
 
 /** Clinic Admin onboards another Clinic Admin for the same clinic (User Story 4). */
 @Component({
@@ -19,6 +20,7 @@ import { UserOnboardingRequest } from '../../shared/models';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -32,12 +34,15 @@ export class ClinicAdminOnboardingFormComponent {
   private readonly clinicAdminOnboardingService = inject(ClinicAdminOnboardingService);
   private readonly notification = inject(NotificationService);
 
+  readonly biologicalSexOptions: BiologicalSex[] = ['MALE', 'FEMALE', 'INTERSEX', 'PREFER_NOT_TO_SAY'];
+
   readonly form = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     dateOfBirth: ['', Validators.required],
     address: createAddressFormGroup(this.fb),
+    biologicalSex: [null as BiologicalSex | null, Validators.required],
   });
 
   submit(): void {
@@ -51,6 +56,7 @@ export class ClinicAdminOnboardingFormComponent {
       email: value.email!,
       dateOfBirth: value.dateOfBirth!,
       address: value.address as AddressFormValue,
+      biologicalSex: value.biologicalSex!,
     };
 
     this.clinicAdminOnboardingService.onboardClinicAdmin(request).subscribe({

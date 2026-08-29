@@ -28,12 +28,23 @@ describe('ClinicAdminOnboardingFormComponent', () => {
       email: 'second@example.com',
       dateOfBirth: '1990-01-01',
       address: { addressLine1: '1 Main St', addressLine2: '', city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
+      biologicalSex: 'FEMALE',
     });
   }
 
   it('does not submit when the form is invalid', () => {
     const fixture = TestBed.createComponent(ClinicAdminOnboardingFormComponent);
     fixture.componentInstance.submit();
+    expect(onboardClinicAdminSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not submit when biological sex is missing (022-role-details-endpoints FR-011)', () => {
+    const fixture = TestBed.createComponent(ClinicAdminOnboardingFormComponent);
+    fillValidForm(fixture.componentInstance);
+    fixture.componentInstance.form.patchValue({ biologicalSex: null });
+
+    fixture.componentInstance.submit();
+
     expect(onboardClinicAdminSpy).not.toHaveBeenCalled();
   });
 
@@ -44,7 +55,9 @@ describe('ClinicAdminOnboardingFormComponent', () => {
 
     fixture.componentInstance.submit();
 
-    expect(onboardClinicAdminSpy).toHaveBeenCalledWith(expect.objectContaining({ email: 'second@example.com' }));
+    expect(onboardClinicAdminSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'second@example.com', biologicalSex: 'FEMALE' })
+    );
     expect(notificationServiceStub.success).toHaveBeenCalledWith('Clinic admin Second Admin onboarded successfully.');
   });
 

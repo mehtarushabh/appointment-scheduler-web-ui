@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
 import { PatientProfileService } from '../patient-profile.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { ConsentDocumentStatus, ConsentDocumentType, MyProfileResponse } from '../../shared/models';
+import { ConsentDocumentStatus, ConsentDocumentType, PatientDetailsResponse } from '../../shared/models';
 
 /**
  * Section 5 (Legal Consents &amp; Policy Acknowledgments, FR-016, FR-017) — a self-contained,
@@ -28,7 +28,7 @@ export class ConsentsSectionComponent {
   private readonly notification = inject(NotificationService);
 
   @Input() consentStatuses: ConsentDocumentStatus[] = [];
-  @Output() readonly sectionSaved = new EventEmitter<MyProfileResponse>();
+  @Output() readonly sectionSaved = new EventEmitter<PatientDetailsResponse>();
 
   private readonly viewedParagraphs = signal<ReadonlyMap<ConsentDocumentType, string[]>>(new Map());
   private readonly loadingType = signal<ConsentDocumentType | null>(null);

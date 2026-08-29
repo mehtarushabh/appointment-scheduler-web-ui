@@ -4,32 +4,90 @@
       <h1>Appointments</h1>
     </div>
 
-    @if (scheduledAppointments().length === 0) {
-      <p>No scheduled appointments.</p>
+    <div class="app-appointments-filters">
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select [value]="status()" (selectionChange)="onStatusChange($event.value)">
+          @for (option of statusOptions; track option) {
+            <mat-option [value]="option">{{ option === 'ALL' ? 'All' : option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>From date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="fromPicker"
+          [value]="dateOnOrAfter()"
+          [max]="dateOnOrBefore()"
+          (dateChange)="onDateOnOrAfterChange($event)"
+        />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+        <mat-datepicker #fromPicker />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>To date</mat-label>
+        <input
+          matInput
+          [matDatepicker]="toPicker"
+          [value]="dateOnOrBefore()"
+          [min]="dateOnOrAfter()"
+          (dateChange)="onDateOnOrBeforeChange($event)"
+        />
+        <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+        <mat-datepicker #toPicker />
+      </mat-form-field>
+
+      @if (userRole() !== 'DOCTOR') {
+        <app-multi-select-filter label="Doctor" [options]="doctorOptions()" (selectionChange)="onDoctorSelectionChange($event)" />
+      }
+
+      @if (userRole() !== 'PATIENT') {
+        <app-multi-select-filter label="Patient" [options]="patientOptions()" (selectionChange)="onPatientSelectionChange($event)" />
+      }
+    </div>
+
+    @if (appointments().length === 0) {
+      <p>No appointments match the current filters.</p>
     } @else {
-      <table mat-table [dataSource]="scheduledAppointments()">
+      <table mat-table [dataSource]="appointments()" matSort [matSortDisableClear]="true" (matSortChange)="onSortChange($event)">
         <ng-container matColumnDef="patientName">
-          <th mat-header-cell *matHeaderCellDef>Patient</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="patientName">Patient</th>
           <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
         </ng-container>
 
         <ng-container matColumnDef="doctorName">
-          <th mat-header-cell *matHeaderCellDef>Doctor</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="doctorName">Doctor</th>
           <td mat-cell *matCellDef="let appointment">{{ appointment.doctorName }}</td>
         </ng-container>
 
+        <!-- Date and Time share one sort (research.md #3); MatSort rejects two mat-sort-header -->
+        <!-- cells with the same id, so both are hand-rolled here instead (research.md #4's -->
+        <!-- documented fallback), driven by the same sortBy()/sortDirection() signals. -->
         <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <th mat-header-cell *matHeaderCellDef class="app-clickable-sort-header" (click)="onDateTimeSortClick()">
+            Date
+            @if (sortBy() === 'DATE_TIME') {
+              <fa-icon [icon]="sortDirection() === 'DESC' ? faSortDown : faSortUp" aria-label="Active sort direction" />
+            }
+          </th>
           <td mat-cell *matCellDef="let appointment">{{ appointment.date }}</td>
         </ng-container>
 
         <ng-container matColumnDef="startTime">
-          <th mat-header-cell *matHeaderCellDef>Time</th>
+          <th mat-header-cell *matHeaderCellDef class="app-clickable-sort-header" (click)="onDateTimeSortClick()">
+            Time
+            @if (sortBy() === 'DATE_TIME') {
+              <fa-icon [icon]="sortDirection() === 'DESC' ? faSortDown : faSortUp" aria-label="Active sort direction" />
+            }
+          </th>
           <td mat-cell *matCellDef="let appointment">{{ appointment.startTime }}</td>
         </ng-container>
 
         <ng-container matColumnDef="state">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="status">Status</th>
           <td mat-cell *matCellDef="let appointment"><span [class]="appointmentStatusClass(appointment.state)">{{ appointment.state }}</span></td>
         </ng-container>
 
@@ -43,66 +101,17 @@
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="scheduledColumns()"></tr>
-        <tr mat-row *matRowDef="let row; columns: scheduledColumns()"></tr>
+        <tr mat-header-row *matHeaderRowDef="columns()"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns()"></tr>
       </table>
 
       <mat-paginator
-        [length]="scheduledTotalElements()"
+        [length]="totalElements()"
         [pageSize]="pageSize"
         [pageSizeOptions]="[pageSize]"
-        [pageIndex]="scheduledPageIndex()"
-        (page)="onScheduledPage($event)"
-        aria-label="Select page of scheduled appointments"
-      />
-    }
-  </mat-card>
-
-  <mat-card class="app-section">
-    <div class="app-page-header">
-      <h1>Past appointments</h1>
-    </div>
-
-    @if (pastAppointments().length === 0) {
-      <p>No past appointments.</p>
-    } @else {
-      <table mat-table [dataSource]="pastAppointments()">
-        <ng-container matColumnDef="patientName">
-          <th mat-header-cell *matHeaderCellDef>Patient</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.patientName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="doctorName">
-          <th mat-header-cell *matHeaderCellDef>Doctor</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.doctorName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="date">
-          <th mat-header-cell *matHeaderCellDef>Date</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.date }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="startTime">
-          <th mat-header-cell *matHeaderCellDef>Time</th>
-          <td mat-cell *matCellDef="let appointment">{{ appointment.startTime }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="state">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let appointment"><span [class]="appointmentStatusClass(appointment.state)">{{ appointment.state }}</span></td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="pastColumns()"></tr>
-        <tr mat-row *matRowDef="let row; columns: pastColumns()"></tr>
-      </table>
-
-      <mat-paginator
-        [length]="pastTotalElements()"
-        [pageSize]="pageSize"
-        [pageSizeOptions]="[pageSize]"
-        [pageIndex]="pastPageIndex()"
-        (page)="onPastPage($event)"
-        aria-label="Select page of past appointments"
+        [pageIndex]="pageIndex()"
+        (page)="onPage($event)"
+        aria-label="Select page of appointments"
       />
     }
   </mat-card>

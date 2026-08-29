@@ -34,12 +34,23 @@ describe('ClinicOnboardingFormComponent', () => {
       adminEmail: 'cara@example.com',
       adminDateOfBirth: '1985-05-05',
       adminAddress: { addressLine1: '2 Elm St', addressLine2: '', city: 'Riverside', state: 'CA', zip: '92501', country: 'USA' },
+      adminBiologicalSex: 'FEMALE',
     });
   }
 
   it('does not submit when the form is invalid', () => {
     const fixture = TestBed.createComponent(ClinicOnboardingFormComponent);
     fixture.componentInstance.submit();
+    expect(onboardClinicSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not submit when the first clinic admin\'s biological sex is missing (022-role-details-endpoints FR-011)', () => {
+    const fixture = TestBed.createComponent(ClinicOnboardingFormComponent);
+    fillValidForm(fixture.componentInstance);
+    fixture.componentInstance.form.patchValue({ adminBiologicalSex: null });
+
+    fixture.componentInstance.submit();
+
     expect(onboardClinicSpy).not.toHaveBeenCalled();
   });
 

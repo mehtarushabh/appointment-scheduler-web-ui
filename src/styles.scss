@@ -165,10 +165,47 @@ form.app-form-wide {
   padding-right: 1rem;
 }
 
+// Bugfix: same root cause as .app-page-header/the table rules above — a <p> (e.g. an empty-state
+// message: "No patients at this clinic yet.", "No doctors onboarded yet.", "No appointments match
+// the current filters.") sitting directly inside a `mat-card` has no side padding at all, touching
+// the card's edges. Scoped to a direct `mat-card` child so a <p> already inside `mat-card-content`
+// (which has its own padding) isn't padded twice.
+.mat-mdc-card > p {
+  padding: 0 1rem;
+}
+
 // Consistent spacing between stacked `mat-card` sections on a single screen (e.g. clinic
 // settings' "Profile" and "Working hours" cards, or a form's sequential sections).
 .app-section + .app-section {
   margin-top: 1.5rem;
+}
+
+// 024-profile-photo-upload: the profile photo panel's preview/placeholder — a fixed-size circle,
+// reusing Material's own neutral surface-variant tokens rather than introducing a new color.
+.app-profile-photo-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.app-profile-photo-preview,
+.app-profile-photo-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.app-profile-photo-preview {
+  object-fit: cover;
+}
+
+.app-profile-photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--mat-sys-surface-variant);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-title-large);
 }
 
 // Feature 013: the real MatPaginator, like .app-page-header/the table before it, needs to match

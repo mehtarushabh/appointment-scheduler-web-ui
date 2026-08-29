@@ -2,10 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 import { EditProfileComponent } from './edit-profile.component';
 import { ProfileService } from '../../shared/profile/profile.service';
+import { PatientProfileService } from '../../patient-profile/patient-profile.service';
+import { DoctorProfileService } from '../../doctor-profile/doctor-profile.service';
 import { ProfileCompletionStatusService } from '../../shared/profile/profile-completion-status.service';
 import { NotificationService } from '../../shared/notification/notification.service';
+import { UserPreferencesService } from '../../shared/preferences/user-preferences.service';
 import { AuthService, UserRole } from '../auth.service';
-import { MyProfileResponse, SectionCompletionStatus } from '../../shared/models';
+import { DoctorDetailsResponse, MyProfileResponse, PatientDetailsResponse, SectionCompletionStatus, UserPreferencesResponse } from '../../shared/models';
 
 function profile(overrides: Partial<MyProfileResponse> = {}): MyProfileResponse {
   return {
@@ -15,27 +18,54 @@ function profile(overrides: Partial<MyProfileResponse> = {}): MyProfileResponse 
     dateOfBirth: '1990-01-01',
     address: { addressLine1: '1 Main St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
     biologicalSex: null,
-    personalPhone: null,
-    doctorDetails: null,
+    profileComplete: true,
+    profilePhotoUrl: null,
+    ...overrides,
+  };
+}
+
+function patientDetails(overrides: Partial<PatientDetailsResponse> = {}): PatientDetailsResponse {
+  return {
     insurance: null,
     emergencyContact: null,
     clinicalHistory: null,
     consentStatuses: [],
+    personalPhone: null,
     profileComplete: true,
     sectionStatus: null,
     ...overrides,
   };
 }
 
+function doctorDetails(overrides: Partial<DoctorDetailsResponse> = {}): DoctorDetailsResponse {
+  return { specialty: 'Cardiology', professionalBio: null, npiNumber: null, stateLicenseNumber: null, ...overrides };
+}
+
+function preferences(overrides: Partial<UserPreferencesResponse> = {}): UserPreferencesResponse {
+  return { defaultLandingPage: '/home', ...overrides };
+}
+
 describe('EditProfileComponent', () => {
   let getMyProfileSpy: ReturnType<typeof vi.fn>;
   let updateMyProfileSpy: ReturnType<typeof vi.fn>;
+  let getPatientDetailsSpy: ReturnType<typeof vi.fn>;
+  let getDoctorDetailsSpy: ReturnType<typeof vi.fn>;
+  let getPreferencesSpy: ReturnType<typeof vi.fn>;
   let notificationServiceStub: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
   let updateDisplayNameSpy: ReturnType<typeof vi.fn>;
 
-  function setup(role: UserRole, profileResponse: MyProfileResponse = profile()) {
+  function setup(
+    role: UserRole,
+    profileResponse: MyProfileResponse = profile(),
+    patientDetailsResponse: PatientDetailsResponse = patientDetails(),
+    doctorDetailsResponse: DoctorDetailsResponse = doctorDetails(),
+    preferencesResponse: UserPreferencesResponse = preferences()
+  ) {
     getMyProfileSpy = vi.fn().mockReturnValue(of(profileResponse));
     updateMyProfileSpy = vi.fn().mockReturnValue(of(profileResponse));
+    getPatientDetailsSpy = vi.fn().mockReturnValue(of(patientDetailsResponse));
+    getDoctorDetailsSpy = vi.fn().mockReturnValue(of(doctorDetailsResponse));
+    getPreferencesSpy = vi.fn().mockReturnValue(of(preferencesResponse));
     notificationServiceStub = { success: vi.fn(), error: vi.fn() };
     updateDisplayNameSpy = vi.fn();
 
@@ -43,6 +73,9 @@ describe('EditProfileComponent', () => {
       imports: [EditProfileComponent],
       providers: [
         { provide: ProfileService, useValue: { getMyProfile: getMyProfileSpy, updateMyProfile: updateMyProfileSpy } },
+        { provide: PatientProfileService, useValue: { getPatientDetails: getPatientDetailsSpy } },
+        { provide: DoctorProfileService, useValue: { getDoctorDetails: getDoctorDetailsSpy } },
+        { provide: UserPreferencesService, useValue: { getPreferences: getPreferencesSpy } },
         { provide: NotificationService, useValue: notificationServiceStub },
         {
           provide: AuthService,
@@ -85,56 +118,17 @@ describe('EditProfileComponent', () => {
     expect(updateMyProfileSpy).not.toHaveBeenCalled();
   });
 
-  it('shows the specialty field for a Doctor and blocks save when it is blank', () => {
-    const fixture = setup('DOCTOR', profile({ doctorDetails: { specialty: 'Cardiology' } }));
-    expect(fixture.componentInstance.isDoctor()).toBe(true);
-    expect(fixture.componentInstance.isPatient()).toBe(false);
-    expect(fixture.componentInstance.form.getRawValue().specialty).toBe('Cardiology');
-
-    fixture.componentInstance.form.patchValue({ specialty: '' });
-    fixture.componentInstance.save();
-
-    expect(updateMyProfileSpy).not.toHaveBeenCalled();
-  });
-
-  it('sends doctorDetails with the specialty for a Doctor save', () => {
-    const fixture = setup('DOCTOR', profile({ doctorDetails: { specialty: 'Cardiology' } }));
-
-    fixture.componentInstance.save();
-
-    expect(updateMyProfileSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ doctorDetails: { specialty: 'Cardiology' } })
-    );
-  });
-
-  it('shows Biological Sex/Personal Phone for a Patient and pre-fills them from the profile (Feature 016 FR-007)', () => {
-    const fixture = setup('PATIENT', profile({ biologicalSex: 'FEMALE', personalPhone: '555-0100' }));
-    expect(fixture.componentInstance.isPatient()).toBe(true);
-    expect(fixture.componentInstance.isDoctor()).toBe(false);
+  it('shows Biological Sex for every role and pre-fills it from the profile (Feature 016 FR-007, 022-role-details-endpoints FR-013)', () => {
+    const fixture = setup('SYSTEM_ADMIN', profile({ biologicalSex: 'FEMALE' }));
     expect(fixture.componentInstance.form.getRawValue().biologicalSex).toBe('FEMALE');
-    expect(fixture.componentInstance.form.getRawValue().personalPhone).toBe('555-0100');
   });
 
-  it('sends biologicalSex/personalPhone for a Patient save but not for other roles', () => {
-    const fixture = setup('PATIENT', profile({ biologicalSex: 'FEMALE', personalPhone: '555-0100' }));
+  it('sends biologicalSex regardless of role (022-role-details-endpoints FR-013)', () => {
+    const fixture = setup('CLINIC_ADMIN', profile({ biologicalSex: 'FEMALE' }));
 
     fixture.componentInstance.save();
 
-    expect(updateMyProfileSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ biologicalSex: 'FEMALE', personalPhone: '555-0100' })
-    );
-  });
-
-  it('shows neither role-specific section for a Clinic Admin and omits Section 1 extras from the save', () => {
-    const fixture = setup('CLINIC_ADMIN');
-    expect(fixture.componentInstance.isDoctor()).toBe(false);
-    expect(fixture.componentInstance.isPatient()).toBe(false);
-
-    fixture.componentInstance.save();
-
-    expect(updateMyProfileSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ doctorDetails: null, biologicalSex: null, personalPhone: null })
-    );
+    expect(updateMyProfileSpy).toHaveBeenCalledWith(expect.objectContaining({ biologicalSex: 'FEMALE' }));
   });
 
   it('keeps the entered values and shows an error when the save fails', () => {
@@ -148,21 +142,59 @@ describe('EditProfileComponent', () => {
     expect(notificationServiceStub.error).toHaveBeenCalledWith('Failed to update profile.');
   });
 
-  // Feature 016: Sections 2-5 used to be a separate "Patient Profile" page — they now live on this
-  // page, below Section 1, so a Patient has one single place to "complete their profile."
-  describe('Sections 2-5 (Feature 016)', () => {
-    it('fetches and exposes the full profile for a Patient, for the Sections 2-5 accordion', () => {
-      const fixture = setup('PATIENT', profile({ profileComplete: false }));
-      expect(fixture.componentInstance.profile()).toEqual(profile({ profileComplete: false }));
+  // 022-role-details-endpoints: specialty moved off this page's own form onto its own
+  // independently-saved panel (ProfessionalDetailsSectionComponent, renamed in
+  // 023-doctor-professional-details), fetched separately from Basic Information.
+  describe('Doctor professional details panel (022-role-details-endpoints; 023-doctor-professional-details)', () => {
+    it('fetches the specialty for a Doctor and exposes it via doctorDetails()', () => {
+      const fixture = setup('DOCTOR', profile(), patientDetails(), doctorDetails({ specialty: 'Neurology' }));
+
+      expect(getDoctorDetailsSpy).toHaveBeenCalled();
+      expect(fixture.componentInstance.doctorDetails()).toEqual(doctorDetails({ specialty: 'Neurology' }));
     });
 
-    it('does not populate profile() for a non-Patient role', () => {
+    it('does not fetch specialty for a non-Doctor role', () => {
       const fixture = setup('SYSTEM_ADMIN');
+
+      expect(getDoctorDetailsSpy).not.toHaveBeenCalled();
+      expect(fixture.componentInstance.doctorDetails()).toBeNull();
+    });
+
+    it('adopts the updated professional details when the panel reports it saved', () => {
+      const fixture = setup('DOCTOR');
+      const updated = doctorDetails({ specialty: 'Neurology' });
+
+      fixture.componentInstance.onDoctorDetailsSaved(updated);
+
+      expect(fixture.componentInstance.doctorDetails()).toEqual(updated);
+    });
+  });
+
+  // Feature 016: Sections 2-5 used to be a separate "Patient Profile" page — they now live on this
+  // page, below Section 1, so a Patient has one single place to "complete their profile." 021-
+  // user-data-restructuring: Section 1 (GET /me/profile) and Sections 2-5 (GET /me/patient-details)
+  // now come from two separate calls, merged into this one profile() signal so the template needs
+  // no change. 022-role-details-endpoints: personalPhone now arrives via the Sections 2-5 fetch too.
+  describe('Sections 2-5 (Feature 016)', () => {
+    it('fetches Section 1 and Sections 2-5 for a Patient and merges them into profile()', () => {
+      const fixture = setup('PATIENT', profile({ firstName: 'Pat' }), patientDetails({ profileComplete: false, personalPhone: '555-0100' }));
+
+      expect(getPatientDetailsSpy).toHaveBeenCalled();
+      expect(fixture.componentInstance.profile()).toEqual({
+        ...profile({ firstName: 'Pat' }),
+        ...patientDetails({ profileComplete: false, personalPhone: '555-0100' }),
+      });
+    });
+
+    it('does not fetch patient details or populate profile() for a non-Patient role', () => {
+      const fixture = setup('SYSTEM_ADMIN');
+
+      expect(getPatientDetailsSpy).not.toHaveBeenCalled();
       expect(fixture.componentInstance.profile()).toBeNull();
     });
 
-    it('publishes the fetched Patient profile\'s completion state to the shared status service', () => {
-      setup('PATIENT', profile({ profileComplete: false }));
+    it("publishes the fetched Patient details' completion state to the shared status service", () => {
+      setup('PATIENT', profile(), patientDetails({ profileComplete: false }));
       const statusService = TestBed.inject(ProfileCompletionStatusService);
       expect(statusService.profileComplete()).toBe(false);
     });
@@ -173,26 +205,52 @@ describe('EditProfileComponent', () => {
       expect(statusService.profileComplete()).toBeNull();
     });
 
-    it('adopts the updated profile and refreshes the shared completion status when a section reports it saved', () => {
-      const fixture = setup('PATIENT', profile({ profileComplete: false }));
+    it('adopts the updated section detail and refreshes the shared completion status when a section reports it saved', () => {
+      const fixture = setup('PATIENT', profile(), patientDetails({ profileComplete: false }));
       const statusService = TestBed.inject(ProfileCompletionStatusService);
-      const updated = profile({ profileComplete: true });
+      const updated = patientDetails({ profileComplete: true });
 
       fixture.componentInstance.onSectionSaved(updated);
 
-      expect(fixture.componentInstance.profile()).toEqual(updated);
+      expect(fixture.componentInstance.profile()).toEqual({ ...profile(), ...updated });
       expect(statusService.profileComplete()).toBe(true);
     });
 
     it("updates profile() and the shared completion status after a Patient's Section 1 save", () => {
-      const fixture = setup('PATIENT', profile({ profileComplete: false }));
-      updateMyProfileSpy.mockReturnValue(of(profile({ profileComplete: true })));
+      const fixture = setup('PATIENT', profile(), patientDetails({ profileComplete: false }));
       const statusService = TestBed.inject(ProfileCompletionStatusService);
+      updateMyProfileSpy.mockReturnValue(of(profile({ biologicalSex: 'FEMALE' })));
+      // Section 1's own response no longer carries profileComplete (research.md, data-model.md) —
+      // save() re-fetches patient-details afterward to pick this up; simulate that returning true.
+      getPatientDetailsSpy.mockReturnValue(of(patientDetails({ profileComplete: true })));
 
       fixture.componentInstance.save();
 
-      expect(fixture.componentInstance.profile()).toEqual(profile({ profileComplete: true }));
+      expect(fixture.componentInstance.profile()).toEqual({
+        ...profile({ biologicalSex: 'FEMALE' }),
+        ...patientDetails({ profileComplete: true }),
+      });
       expect(statusService.profileComplete()).toBe(true);
+    });
+  });
+
+  // 026-user-preferences: Preferences is its own independently-saved panel, fetched separately for
+  // every role — matching how the Photo section already works, not part of the Patient section list.
+  describe('Preferences panel (026-user-preferences)', () => {
+    it('fetches preferences for every role and exposes it via preferences()', () => {
+      const fixture = setup('SYSTEM_ADMIN', profile(), patientDetails(), doctorDetails(), preferences({ defaultLandingPage: '/clinics/new' }));
+
+      expect(getPreferencesSpy).toHaveBeenCalled();
+      expect(fixture.componentInstance.preferences()).toEqual(preferences({ defaultLandingPage: '/clinics/new' }));
+    });
+
+    it('adopts the updated preferences when the panel reports it saved', () => {
+      const fixture = setup('SYSTEM_ADMIN');
+      const updated = preferences({ defaultLandingPage: '/clinics/new' });
+
+      fixture.componentInstance.onPreferencesSaved(updated);
+
+      expect(fixture.componentInstance.preferences()).toEqual(updated);
     });
   });
 
@@ -226,7 +284,8 @@ describe('EditProfileComponent', () => {
     it('lists all five sections in FR-002 order, with each one\'s checkmark reflecting a genuine mix from sectionStatus', () => {
       const fixture = setup(
         'PATIENT',
-        profile({ sectionStatus: sectionStatus({ basicInformation: true, insurance: true }) })
+        profile(),
+        patientDetails({ sectionStatus: sectionStatus({ basicInformation: true, insurance: true }) })
       );
 
       expect(fixture.componentInstance.sections()).toEqual([
@@ -239,9 +298,9 @@ describe('EditProfileComponent', () => {
     });
 
     it('reflects an updated sectionStatus immediately after a section reports it saved, with no reload', () => {
-      const fixture = setup('PATIENT', profile({ sectionStatus: sectionStatus() }));
+      const fixture = setup('PATIENT', profile(), patientDetails({ sectionStatus: sectionStatus() }));
 
-      fixture.componentInstance.onSectionSaved(profile({ sectionStatus: sectionStatus({ emergencyContact: true }) }));
+      fixture.componentInstance.onSectionSaved(patientDetails({ sectionStatus: sectionStatus({ emergencyContact: true }) }));
 
       expect(fixture.componentInstance.sections().find((s) => s.id === 'emergencyContact')?.complete).toBe(true);
     });

@@ -5,37 +5,47 @@ import {
   ConsentAcceptanceRequest,
   ConsentDocumentContent,
   ConsentDocumentType,
-  MyProfileResponse,
+  PatientDetailsResponse,
   UpdateClinicalHistoryRequest,
   UpdateEmergencyContactRequest,
   UpdateInsuranceRequest,
+  UpdatePersonalPhoneRequest,
 } from '../shared/models';
 
 /**
- * Sections 2-5 writes (Feature 016 FR-012 through FR-017) — each its own endpoint, per
- * research.md #16. Reads go through the existing `ProfileService.getMyProfile()` (already
- * extended to return every section in one combined read); this service intentionally does not
- * duplicate that call.
+ * Sections 2-5 reads/writes (Feature 016 FR-012 through FR-017) — each write its own endpoint, per
+ * research.md #16. 021-user-data-restructuring moved these off /me/profile/* to /me/patient-
+ * details/* and gave this service its own combined read (`getPatientDetails`) — Section 1 still
+ * goes through `ProfileService.getMyProfile()`, which no longer carries these fields.
  */
 @Injectable({ providedIn: 'root' })
 export class PatientProfileService {
   private readonly http = inject(HttpClient);
 
-  updateInsurance(request: UpdateInsuranceRequest): Observable<MyProfileResponse> {
-    return this.http.patch<MyProfileResponse>('/api/v1/me/profile/insurance', request);
+  getPatientDetails(): Observable<PatientDetailsResponse> {
+    return this.http.get<PatientDetailsResponse>('/api/v1/me/patient-details');
   }
 
-  updateEmergencyContact(request: UpdateEmergencyContactRequest): Observable<MyProfileResponse> {
-    return this.http.patch<MyProfileResponse>('/api/v1/me/profile/emergency-contact', request);
+  updateInsurance(request: UpdateInsuranceRequest): Observable<PatientDetailsResponse> {
+    return this.http.patch<PatientDetailsResponse>('/api/v1/me/patient-details/insurance', request);
   }
 
-  updateClinicalHistory(request: UpdateClinicalHistoryRequest): Observable<MyProfileResponse> {
-    return this.http.patch<MyProfileResponse>('/api/v1/me/profile/clinical-history', request);
+  updateEmergencyContact(request: UpdateEmergencyContactRequest): Observable<PatientDetailsResponse> {
+    return this.http.patch<PatientDetailsResponse>('/api/v1/me/patient-details/emergency-contact', request);
+  }
+
+  updateClinicalHistory(request: UpdateClinicalHistoryRequest): Observable<PatientDetailsResponse> {
+    return this.http.patch<PatientDetailsResponse>('/api/v1/me/patient-details/clinical-history', request);
+  }
+
+  /** 022-role-details-endpoints: moved off /me/profile — doesn't fit any of the other four sections, so it's its own small write. */
+  updatePersonalPhone(request: UpdatePersonalPhoneRequest): Observable<PatientDetailsResponse> {
+    return this.http.patch<PatientDetailsResponse>('/api/v1/me/patient-details/personal-phone', request);
   }
 
   /** FR-016, FR-017: documentVersion/ipAddress/userAgent are never sent — the server determines/captures them (research.md #7, #9). */
-  acceptConsent(request: ConsentAcceptanceRequest): Observable<MyProfileResponse> {
-    return this.http.post<MyProfileResponse>('/api/v1/me/profile/consents', request);
+  acceptConsent(request: ConsentAcceptanceRequest): Observable<PatientDetailsResponse> {
+    return this.http.post<PatientDetailsResponse>('/api/v1/me/patient-details/consents', request);
   }
 
   /** Fetched on demand when a document is expanded to view — not pre-loaded with the rest of the profile (research.md #7). */

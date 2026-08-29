@@ -1,38 +1,12 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
-import { AuthService, UserRole } from '../auth.service';
+import { AuthService } from '../auth.service';
 import { ProfileService } from '../../shared/profile/profile.service';
 import { ProfileCompletionStatusService } from '../../shared/profile/profile-completion-status.service';
-
-interface NavLink {
-  label: string;
-  path: string;
-}
-
-const SCHEDULE_APPOINTMENT_PATH = '/schedule-appointment';
-
-/** FR-005: nav links after the title, scoped to the logged-in user's role. */
-const ROLE_NAV_LINKS: Record<UserRole, NavLink[]> = {
-  SYSTEM_ADMIN: [{ label: 'Register new clinic', path: '/clinics/new' }],
-  CLINIC_ADMIN: [
-    { label: 'Clinic settings', path: '/clinic-settings' },
-    { label: 'Doctors', path: '/doctors' },
-    { label: 'Patients', path: '/patients' },
-    { label: 'Appointments', path: '/appointments' },
-  ],
-  DOCTOR: [
-    { label: 'My schedule', path: '/my-schedule' },
-    { label: 'Patients', path: '/doctor/patients' },
-    { label: 'Appointments', path: '/appointments' },
-  ],
-  PATIENT: [
-    { label: 'Schedule appointment', path: SCHEDULE_APPOINTMENT_PATH },
-    { label: 'Appointments', path: '/appointments' },
-  ],
-};
+import { ROLE_NAV_LINKS, SCHEDULE_APPOINTMENT_PATH } from '../../shared/nav-links';
 
 /**
  * Persistent title bar + nav shell for every page, authenticated or not (FR-001, FR-014,
@@ -69,13 +43,29 @@ export class AppShellComponent {
     () => this.auth.currentUser()?.role === 'PATIENT' && this.profileCompletionStatus.profileComplete() === false
   );
 
-  /** Keeps profileCompletionStatus in sync with the logged-in Patient, and clears it on logout/role change. */
+  /** The logged-in user's own profile photo (024-profile-photo-upload) — shown next to userName() below; null shows a placeholder. */
+  readonly profilePhotoUrl = signal<string | null>(null);
+
+  /**
+   * Keeps profileCompletionStatus (and, 024-profile-photo-upload, profilePhotoUrl) in sync with
+   * the logged-in user, and clears both on logout/role change. 022-role-details-endpoints
+   * (research.md #7): reads profileComplete off the lean, cached GET /me/profile for every
+   * authenticated role, not just Patient — every role now needs this one cached fetch to have
+   * happened once (so Edit Profile's own read resolves instantly), even though only Patient's
+   * nav-gating below actually reads the completion flag (it's unconditionally true for every
+   * other role, research.md #4). The same cached fetch already carries profilePhotoUrl for every
+   * role, so the title bar's photo needs no separate network call either.
+   */
   private readonly syncProfileCompletion = effect(() => {
     const user = this.auth.currentUser();
-    if (user?.role === 'PATIENT') {
-      this.profileService.getMyProfile().subscribe((profile) => this.profileCompletionStatus.set(profile.profileComplete));
+    if (user) {
+      this.profileService.getMyProfile().subscribe((profile) => {
+        this.profileCompletionStatus.set(profile.profileComplete);
+        this.profilePhotoUrl.set(profile.profilePhotoUrl);
+      });
     } else {
       this.profileCompletionStatus.reset();
+      this.profilePhotoUrl.set(null);
     }
   });
 

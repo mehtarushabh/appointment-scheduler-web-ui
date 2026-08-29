@@ -1,0 +1,18 @@
+<h3>Preferences</h3>
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-card class="app-section">
+    <mat-card-content>
+      <mat-form-field appearance="outline">
+        <mat-label>Default landing page</mat-label>
+        <mat-select formControlName="defaultLandingPage">
+          @for (option of landingPageOptions(); track option.path) {
+            <mat-option [value]="option.path">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-flat-button type="submit" [disabled]="saving()">Save preferences</button>
+    </mat-card-actions>
+  </mat-card>
+</form>

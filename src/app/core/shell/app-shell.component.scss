@@ -29,3 +29,22 @@
 .app-nav-link-active {
   border-bottom: 2px solid var(--mat-sys-primary);
 }
+
+// 024-profile-photo-upload (FR-005): a small avatar/placeholder next to the user's name in the
+// title bar, reusing the same neutral surface-variant tokens as Edit Profile's larger preview.
+.app-shell-avatar,
+.app-shell-avatar-placeholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.app-shell-avatar {
+  object-fit: cover;
+}
+
+.app-shell-avatar-placeholder {
+  display: inline-block;
+  background-color: var(--mat-sys-surface-variant);
+}

@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { PatientProfileService } from '../patient-profile.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { BiologicalSex, InsuranceDetails, MyProfileResponse, PolicyholderRelationship } from '../../shared/models';
+import { BiologicalSex, InsuranceDetails, PatientDetailsResponse, PolicyholderRelationship } from '../../shared/models';
 
 /**
  * Section 3 (Insurance &amp; Financial Responsibility, FR-014) — a self-contained, independently-
@@ -45,7 +45,7 @@ export class InsuranceSectionComponent implements OnChanges, OnInit {
   @Input() patientName: string | null = null;
   @Input() patientDateOfBirth: string | null = null;
   @Input() patientBiologicalSex: BiologicalSex | null = null;
-  @Output() readonly sectionSaved = new EventEmitter<MyProfileResponse>();
+  @Output() readonly sectionSaved = new EventEmitter<PatientDetailsResponse>();
 
   readonly relationshipOptions: PolicyholderRelationship[] = ['SELF', 'SPOUSE', 'CHILD'];
   readonly biologicalSexOptions: BiologicalSex[] = ['MALE', 'FEMALE', 'INTERSEX', 'PREFER_NOT_TO_SAY'];

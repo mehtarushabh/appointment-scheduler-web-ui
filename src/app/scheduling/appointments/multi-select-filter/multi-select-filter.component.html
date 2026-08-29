@@ -1,0 +1,32 @@
+@if (options.length === 0) {
+  <mat-form-field>
+    <mat-label>{{ label }}</mat-label>
+    <input matInput disabled placeholder="Nothing to select yet." value="" />
+    <mat-hint>Nothing to select yet.</mat-hint>
+  </mat-form-field>
+} @else {
+  <mat-form-field>
+    <mat-label>{{ label }}</mat-label>
+    <mat-select multiple [value]="selectedIds()" (selectionChange)="onMatSelectionChange($event)">
+      <div class="app-multi-select-filter-search" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+        <input
+          matInput
+          type="text"
+          [attr.aria-label]="'Search ' + label"
+          [placeholder]="'Search ' + label"
+          (input)="onSearchInput($any($event.target).value)"
+        />
+      </div>
+      <div class="app-multi-select-filter-select-all" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+        <mat-checkbox
+          [checked]="allVisibleSelected()"
+          [indeterminate]="someVisibleSelected()"
+          (change)="toggleSelectAll()"
+        >Select all</mat-checkbox>
+      </div>
+      @for (option of filteredOptions(); track option.id) {
+        <mat-option [value]="option.id">{{ option.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+}

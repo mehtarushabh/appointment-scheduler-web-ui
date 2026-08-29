@@ -1,2 +1,34 @@
 // Feature 008: page header/card layout now comes from the shared .app-page/.app-page-header
 // classes in styles.scss (research.md #2) instead of a component-local .header rule.
+
+// Feature 019: the filter controls sit in a wrapping row above the single unified table. Side
+// padding matches the shared `.mat-mdc-card > p`/table/header rules in styles.scss — this row is
+// also a direct `mat-card` child with no padding of its own otherwise, so it would touch the
+// card's edges exactly like those did before their fix.
+.app-appointments-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+
+  mat-form-field {
+    min-width: 12rem;
+  }
+}
+
+// Feature 020 (research.md #4): the Date/Time header cells are hand-rolled, not real
+// mat-sort-header — mat-sort-header applies this same cursor/hover treatment automatically, so
+// these two need it added manually to stay visually consistent with Patient/Doctor/Status.
+.app-clickable-sort-header {
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--mat-sys-surface-container-high);
+  }
+
+  fa-icon {
+    margin-left: 0.25rem;
+  }
+}

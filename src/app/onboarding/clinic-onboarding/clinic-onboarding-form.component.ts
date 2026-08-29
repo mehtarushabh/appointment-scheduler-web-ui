@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -10,7 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '../../shared/address-form/address-form.component';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { ClinicOnboardingService } from './clinic-onboarding.service';
-import { ClinicOnboardingRequest } from '../../shared/models';
+import { BiologicalSex, ClinicOnboardingRequest } from '../../shared/models';
 
 /** System Admin onboards a Clinic + its first Clinic Admin in one submission (User Story 1). */
 @Component({
@@ -20,6 +21,7 @@ import { ClinicOnboardingRequest } from '../../shared/models';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatDatepickerModule,
     MatNativeDateModule,
@@ -34,6 +36,8 @@ export class ClinicOnboardingFormComponent {
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
 
+  readonly biologicalSexOptions: BiologicalSex[] = ['MALE', 'FEMALE', 'INTERSEX', 'PREFER_NOT_TO_SAY'];
+
   readonly form = this.fb.group({
     name: ['', Validators.required],
     registeredId: ['', Validators.required],
@@ -43,6 +47,7 @@ export class ClinicOnboardingFormComponent {
     adminEmail: ['', [Validators.required, Validators.email]],
     adminDateOfBirth: ['', Validators.required],
     adminAddress: createAddressFormGroup(this.fb),
+    adminBiologicalSex: [null as BiologicalSex | null, Validators.required],
   });
 
   submit(): void {
@@ -60,6 +65,7 @@ export class ClinicOnboardingFormComponent {
         email: value.adminEmail!,
         dateOfBirth: value.adminDateOfBirth!,
         address: value.adminAddress as AddressFormValue,
+        biologicalSex: value.adminBiologicalSex!,
       },
     };
 

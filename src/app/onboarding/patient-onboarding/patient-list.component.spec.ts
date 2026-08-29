@@ -4,9 +4,19 @@ import { of } from 'rxjs';
 import { PatientListComponent } from './patient-list.component';
 import { PatientOnboardingService } from './patient-onboarding.service';
 import { AddPatientDialogComponent } from './add-patient-dialog/add-patient-dialog.component';
-import { PatientProfileView, UserResponse } from '../../shared/models';
+import { PatientListResponse, PatientProfileView, UserResponse } from '../../shared/models';
 
-function patient(overrides: Partial<UserResponse>): UserResponse {
+function patient(overrides: Partial<PatientListResponse>): PatientListResponse {
+  return {
+    id: '1',
+    firstName: 'Pat',
+    lastName: 'Ient',
+    email: 'pat@example.com',
+    ...overrides,
+  };
+}
+
+function patientProfile(overrides: Partial<UserResponse> = {}): UserResponse {
   return {
     id: '1',
     firstName: 'Pat',
@@ -17,8 +27,6 @@ function patient(overrides: Partial<UserResponse>): UserResponse {
     role: 'PATIENT',
     clinicId: 'clinic-1',
     specialty: null,
-    biologicalSex: null,
-    personalPhone: null,
     ...overrides,
   };
 }
@@ -42,7 +50,7 @@ function profileView(overrides: Partial<PatientProfileView> = {}): PatientProfil
 }
 
 describe('PatientListComponent', () => {
-  function setup(patients: UserResponse[], dialogAfterClosedResult?: UserResponse) {
+  function setup(patients: PatientListResponse[], dialogAfterClosedResult?: UserResponse) {
     const listPatientsSpy = vi.fn().mockReturnValue(of(patients));
     const getPatientProfileSpy = vi.fn().mockReturnValue(of(profileView()));
     const dialogOpenSpy = vi.fn().mockReturnValue({ afterClosed: () => of(dialogAfterClosedResult) });
@@ -110,7 +118,7 @@ describe('PatientListComponent', () => {
   });
 
   it('appends the created/linked patient to the list when the dialog closes with a result (FR-008)', () => {
-    const created = patient({ id: 'new-1', firstName: 'New', lastName: 'Patient' });
+    const created = patientProfile({ id: 'new-1', firstName: 'New', lastName: 'Patient' });
     const { fixture } = setup([patient({ id: '1' })], created);
 
     fixture.componentInstance.openAddPatientDialog();

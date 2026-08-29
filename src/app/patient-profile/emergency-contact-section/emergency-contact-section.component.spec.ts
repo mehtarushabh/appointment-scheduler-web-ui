@@ -3,7 +3,7 @@ import { of, throwError } from 'rxjs';
 import { EmergencyContactSectionComponent } from './emergency-contact-section.component';
 import { PatientProfileService } from '../patient-profile.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { MyProfileResponse } from '../../shared/models';
+import { PatientDetailsResponse } from '../../shared/models';
 
 describe('EmergencyContactSectionComponent', () => {
   let updateEmergencyContactSpy: ReturnType<typeof vi.fn>;
@@ -45,7 +45,7 @@ describe('EmergencyContactSectionComponent', () => {
   });
 
   it('saves the section and emits the updated profile on success', () => {
-    const updated = { firstName: 'Pat' } as MyProfileResponse;
+    const updated = { profileComplete: true } as PatientDetailsResponse;
     updateEmergencyContactSpy.mockReturnValue(of(updated));
     const fixture = TestBed.createComponent(EmergencyContactSectionComponent);
     fixture.componentInstance.form.setValue({
@@ -54,7 +54,7 @@ describe('EmergencyContactSectionComponent', () => {
       primaryPhone: '555-0200',
       secondaryPhone: '',
     });
-    const emitted: MyProfileResponse[] = [];
+    const emitted: PatientDetailsResponse[] = [];
     fixture.componentInstance.sectionSaved.subscribe((p) => emitted.push(p));
 
     fixture.componentInstance.save();
@@ -75,7 +75,7 @@ describe('EmergencyContactSectionComponent', () => {
       primaryPhone: '555-0200',
       secondaryPhone: '',
     });
-    const emitted: MyProfileResponse[] = [];
+    const emitted: PatientDetailsResponse[] = [];
     fixture.componentInstance.sectionSaved.subscribe((p) => emitted.push(p));
 
     fixture.componentInstance.save();

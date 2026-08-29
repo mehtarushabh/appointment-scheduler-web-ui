@@ -2,12 +2,12 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { DoctorPatientListComponent } from './doctor-patient-list.component';
 import { PatientOnboardingService } from '../../onboarding/patient-onboarding/patient-onboarding.service';
-import { PatientProfileView, UserResponse } from '../../shared/models';
+import { PatientListResponse, PatientProfileView } from '../../shared/models';
 
 describe('DoctorPatientListComponent', () => {
   let listPatientsSpy: ReturnType<typeof vi.fn>;
   let getPatientProfileSpy: ReturnType<typeof vi.fn>;
-  const patient = { id: 'p1', firstName: 'Pat', lastName: 'Ient', email: 'pat@example.com' } as UserResponse;
+  const patient = { id: 'p1', firstName: 'Pat', lastName: 'Ient', email: 'pat@example.com' } as PatientListResponse;
 
   beforeEach(() => {
     listPatientsSpy = vi.fn().mockReturnValue(of([patient]));
@@ -46,7 +46,7 @@ describe('DoctorPatientListComponent', () => {
   });
 
   it('expands and collapses multiple rows independently', () => {
-    const patient2 = { ...patient, id: 'p2' } as UserResponse;
+    const patient2 = { ...patient, id: 'p2' } as PatientListResponse;
     listPatientsSpy.mockReturnValue(of([patient, patient2]));
     const fixture = TestBed.createComponent(DoctorPatientListComponent);
     fixture.detectChanges();

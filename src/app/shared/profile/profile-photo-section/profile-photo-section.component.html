@@ -1,0 +1,16 @@
+<mat-card>
+  <mat-card-content class="app-profile-photo-content">
+    @if (profilePhotoUrl) {
+      <img [src]="profilePhotoUrl" alt="Your profile photo" class="app-profile-photo-preview" />
+    } @else {
+      <div class="app-profile-photo-placeholder" aria-hidden="true">?</div>
+    }
+
+    <div>
+      <input #fileInput type="file" accept="image/jpeg,image/png" hidden (change)="onFileSelected($event)" />
+      <button mat-flat-button type="button" [disabled]="uploading()" (click)="fileInput.click()">
+        {{ profilePhotoUrl ? 'Change photo' : 'Upload photo' }}
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>

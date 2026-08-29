@@ -30,6 +30,9 @@
         @switch (selectedSection()) {
           @case ('basicInformation') {
             <ng-container [ngTemplateOutlet]="basicInformationForm" />
+            <app-profile-photo-section [profilePhotoUrl]="profilePhotoUrl()" (sectionSaved)="onProfilePhotoSaved($event)" />
+            <app-personal-phone-section [personalPhone]="p.personalPhone" (sectionSaved)="onSectionSaved($event)" />
+            <app-preferences-section [preferences]="preferences()" (sectionSaved)="onPreferencesSaved($event)" />
           }
           @case ('emergencyContact') {
             <app-emergency-contact-section [emergencyContact]="p.emergencyContact" (sectionSaved)="onSectionSaved($event)" />
@@ -56,6 +59,11 @@
 } @else {
   <h3>Basic Information</h3>
   <ng-container [ngTemplateOutlet]="basicInformationForm" />
+  <app-profile-photo-section [profilePhotoUrl]="profilePhotoUrl()" (sectionSaved)="onProfilePhotoSaved($event)" />
+  @if (isDoctor()) {
+    <app-professional-details-section [doctorDetails]="doctorDetails()" (sectionSaved)="onDoctorDetailsSaved($event)" />
+  }
+  <app-preferences-section [preferences]="preferences()" (sectionSaved)="onPreferencesSaved($event)" />
 }
 
 <ng-template #basicInformationForm>
@@ -84,30 +92,16 @@
           <mat-datepicker #dobPicker />
         </mat-form-field>
 
-        @if (isDoctor()) {
-          <mat-form-field appearance="outline">
-            <mat-label>Specialty</mat-label>
-            <input matInput formControlName="specialty" />
-          </mat-form-field>
-        }
-
         <app-address-form [group]="form.controls.address" />
 
-        @if (isPatient()) {
-          <mat-form-field appearance="outline">
-            <mat-label>Biological sex</mat-label>
-            <mat-select formControlName="biologicalSex">
-              @for (option of biologicalSexOptions; track option) {
-                <mat-option [value]="option">{{ option }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline">
-            <mat-label>Personal phone</mat-label>
-            <input matInput formControlName="personalPhone" />
-          </mat-form-field>
-        }
+        <mat-form-field appearance="outline">
+          <mat-label>Biological sex</mat-label>
+          <mat-select formControlName="biologicalSex">
+            @for (option of biologicalSexOptions; track option) {
+              <mat-option [value]="option">{{ option }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
       </mat-card-content>
       <mat-card-actions>
         <button mat-flat-button type="submit" [disabled]="form.invalid">Save profile</button>

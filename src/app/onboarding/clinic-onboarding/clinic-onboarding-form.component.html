@@ -48,6 +48,15 @@
       </mat-form-field>
 
       <app-address-form [group]="form.controls.adminAddress" />
+
+      <mat-form-field appearance="outline">
+        <mat-label>Biological sex</mat-label>
+        <mat-select formControlName="adminBiologicalSex">
+          @for (option of biologicalSexOptions; track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </mat-card-content>
   </mat-card>
 

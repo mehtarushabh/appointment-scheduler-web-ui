@@ -3,13 +3,14 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AddressFormComponent, AddressFormValue, createAddressFormGroup } from '../../../shared/address-form/address-form.component';
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { DoctorOnboardingService } from '../doctor-onboarding.service';
-import { DoctorOnboardingRequest, UserResponse } from '../../../shared/models';
+import { BiologicalSex, DoctorOnboardingRequest, UserResponse } from '../../../shared/models';
 
 /**
  * Two-step "Add a new doctor" pop-up (Feature 005 US2): a fields step, then a read-only confirm
@@ -25,6 +26,7 @@ import { DoctorOnboardingRequest, UserResponse } from '../../../shared/models';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatDatepickerModule,
     AddressFormComponent,
@@ -44,6 +46,8 @@ export class AddDoctorDialogComponent {
 
   readonly step = signal<'fields' | 'confirm'>('fields');
 
+  readonly biologicalSexOptions: BiologicalSex[] = ['MALE', 'FEMALE', 'INTERSEX', 'PREFER_NOT_TO_SAY'];
+
   readonly form = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -51,6 +55,7 @@ export class AddDoctorDialogComponent {
     dateOfBirth: ['', Validators.required],
     specialty: ['', Validators.required],
     address: createAddressFormGroup(this.fb),
+    biologicalSex: [null as BiologicalSex | null, Validators.required],
   });
 
   /** Read-only, typed view of the form's current values for the confirm step's summary. */
@@ -86,6 +91,7 @@ export class AddDoctorDialogComponent {
       dateOfBirth: value.dateOfBirth!,
       specialty: value.specialty!,
       address: value.address as AddressFormValue,
+      biologicalSex: value.biologicalSex!,
     };
 
     this.doctorOnboardingService.onboardDoctor(request).subscribe({

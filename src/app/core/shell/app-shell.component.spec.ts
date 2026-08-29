@@ -18,22 +18,17 @@ function sessionFor(overrides: Partial<AuthSession>): AuthSession {
   };
 }
 
+/** 022-role-details-endpoints: this shell only ever needed profileComplete, which now lives on the lean, cached MyProfileResponse. */
 function profile(overrides: Partial<MyProfileResponse> = {}): MyProfileResponse {
   return {
-    firstName: 'Pat',
-    lastName: 'Ient',
-    email: 'pat@example.com',
+    firstName: 'Ada',
+    lastName: 'Admin',
+    email: 'ada@example.com',
     dateOfBirth: '1990-01-01',
     address: { addressLine1: '1 Main St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
-    biologicalSex: 'FEMALE',
-    personalPhone: '555-0100',
-    doctorDetails: null,
-    insurance: null,
-    emergencyContact: null,
-    clinicalHistory: null,
-    consentStatuses: [],
+    biologicalSex: null,
     profileComplete: true,
-    sectionStatus: null,
+    profilePhotoUrl: null,
     ...overrides,
   };
 }
@@ -132,12 +127,19 @@ describe('AppShellComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith('/login');
   });
 
-  it('does not fetch the profile for a non-Patient role', () => {
+  // 022-role-details-endpoints (research.md #7): every role now triggers this one cached fetch on
+  // mount, not just Patient — so Edit Profile's own later read resolves from the cache instantly.
+  it('fetches profile for every authenticated role, not just Patient', () => {
     const { getMyProfileSpy } = setup(sessionFor({ role: 'CLINIC_ADMIN' }));
+    expect(getMyProfileSpy).toHaveBeenCalled();
+  });
+
+  it('does not fetch a profile when nobody is logged in', () => {
+    const { getMyProfileSpy } = setup(null);
     expect(getMyProfileSpy).not.toHaveBeenCalled();
   });
 
-  it('fetches the profile for a Patient and disables Schedule appointment when it is incomplete (Feature 016 FR-019/FR-020)', () => {
+  it('disables Schedule appointment for a Patient whose fetched profile has profileComplete: false (Feature 016 FR-019/FR-020)', () => {
     const { fixture, getMyProfileSpy } = setup(sessionFor({ role: 'PATIENT' }), profile({ profileComplete: false }));
 
     expect(getMyProfileSpy).toHaveBeenCalled();
@@ -156,8 +158,35 @@ describe('AppShellComponent', () => {
     expect(fixture.componentInstance.scheduleAppointmentDisabled()).toBe(false);
   });
 
-  it('never disables Schedule appointment for a non-Patient role', () => {
-    const { fixture } = setup(sessionFor({ role: 'CLINIC_ADMIN' }));
+  it('never disables Schedule appointment for a non-Patient role, even though it also fetches a profile', () => {
+    const { fixture } = setup(sessionFor({ role: 'CLINIC_ADMIN' }), profile({ profileComplete: false }));
     expect(fixture.componentInstance.scheduleAppointmentDisabled()).toBe(false);
+  });
+
+  // 024-profile-photo-upload: read off the same cached GET /me/profile fetch as profileComplete — no second network call.
+  describe('profile photo (024-profile-photo-upload)', () => {
+    it('shows a placeholder, not the user photo image, when profilePhotoUrl is null', () => {
+      const { fixture } = setup(sessionFor({ role: 'SYSTEM_ADMIN' }), profile({ profilePhotoUrl: null }));
+
+      expect(fixture.componentInstance.profilePhotoUrl()).toBeNull();
+      fixture.detectChanges();
+      expect(fixture.nativeElement.querySelector('.app-shell-avatar-placeholder')).toBeTruthy();
+      expect(fixture.nativeElement.querySelector('.app-shell-avatar')).toBeFalsy();
+    });
+
+    it('shows the user photo image next to the name when profilePhotoUrl is set', () => {
+      const { fixture } = setup(sessionFor({ role: 'SYSTEM_ADMIN' }), profile({ profilePhotoUrl: 'https://example.com/photo.png' }));
+
+      expect(fixture.componentInstance.profilePhotoUrl()).toBe('https://example.com/photo.png');
+      fixture.detectChanges();
+      const img = fixture.nativeElement.querySelector('.app-shell-avatar') as HTMLImageElement;
+      expect(img).toBeTruthy();
+      expect(img.src).toBe('https://example.com/photo.png');
+    });
+
+    it('clears the photo when nobody is logged in', () => {
+      const { fixture } = setup(null);
+      expect(fixture.componentInstance.profilePhotoUrl()).toBeNull();
+    });
   });
 });

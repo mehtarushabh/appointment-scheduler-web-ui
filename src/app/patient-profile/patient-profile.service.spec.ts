@@ -18,7 +18,15 @@ describe('PatientProfileService', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('PATCHes /me/profile/insurance', () => {
+  it('GETs /me/patient-details', () => {
+    service.getPatientDetails().subscribe();
+
+    const req = httpMock.expectOne('/api/v1/me/patient-details');
+    expect(req.request.method).toBe('GET');
+    req.flush({});
+  });
+
+  it('PATCHes /me/patient-details/insurance', () => {
     const request: UpdateInsuranceRequest = {
       insuranceName: 'Acme',
       memberId: 'MEM-1',
@@ -32,13 +40,13 @@ describe('PatientProfileService', () => {
 
     service.updateInsurance(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/me/profile/insurance');
+    const req = httpMock.expectOne('/api/v1/me/patient-details/insurance');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(request);
     req.flush({});
   });
 
-  it('PATCHes /me/profile/emergency-contact', () => {
+  it('PATCHes /me/patient-details/emergency-contact', () => {
     const request: UpdateEmergencyContactRequest = {
       contactFullName: 'Jordan Contact',
       relationship: 'SPOUSAL',
@@ -48,13 +56,13 @@ describe('PatientProfileService', () => {
 
     service.updateEmergencyContact(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/me/profile/emergency-contact');
+    const req = httpMock.expectOne('/api/v1/me/patient-details/emergency-contact');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(request);
     req.flush({});
   });
 
-  it('PATCHes /me/profile/clinical-history', () => {
+  it('PATCHes /me/patient-details/clinical-history', () => {
     const request: UpdateClinicalHistoryRequest = {
       medications: [],
       allergies: [],
@@ -65,7 +73,7 @@ describe('PatientProfileService', () => {
 
     service.updateClinicalHistory(request).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/me/profile/clinical-history');
+    const req = httpMock.expectOne('/api/v1/me/patient-details/clinical-history');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual(request);
     req.flush({});

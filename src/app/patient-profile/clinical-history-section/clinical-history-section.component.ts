@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { PatientProfileService } from '../patient-profile.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { AllergyCategory, AllergySeverity, ClinicalHistoryDetails, MyProfileResponse } from '../../shared/models';
+import { AllergyCategory, AllergySeverity, ClinicalHistoryDetails, PatientDetailsResponse } from '../../shared/models';
 
 /**
  * Section 4 (Clinical History &amp; Health Intake, FR-015) — a self-contained, independently-
@@ -28,7 +28,7 @@ export class ClinicalHistorySectionComponent implements OnChanges {
   private readonly notification = inject(NotificationService);
 
   @Input() clinicalHistory: ClinicalHistoryDetails | null = null;
-  @Output() readonly sectionSaved = new EventEmitter<MyProfileResponse>();
+  @Output() readonly sectionSaved = new EventEmitter<PatientDetailsResponse>();
 
   readonly allergyCategoryOptions: AllergyCategory[] = ['MEDICATION', 'FOOD', 'ENVIRONMENTAL', 'LATEX'];
   readonly allergySeverityOptions: AllergySeverity[] = ['MILD', 'MODERATE', 'SEVERE_ANAPHYLAXIS'];

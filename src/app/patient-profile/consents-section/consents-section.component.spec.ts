@@ -3,7 +3,7 @@ import { of, throwError } from 'rxjs';
 import { ConsentsSectionComponent } from './consents-section.component';
 import { PatientProfileService } from '../patient-profile.service';
 import { NotificationService } from '../../shared/notification/notification.service';
-import { ConsentDocumentContent, ConsentDocumentStatus, MyProfileResponse } from '../../shared/models';
+import { ConsentDocumentContent, ConsentDocumentStatus, PatientDetailsResponse } from '../../shared/models';
 
 const CONSENT_TO_TREAT: ConsentDocumentStatus = {
   documentType: 'CONSENT_TO_TREAT',
@@ -86,12 +86,12 @@ describe('ConsentsSectionComponent', () => {
     getConsentDocumentSpy.mockReturnValue(
       of({ documentType: 'CONSENT_TO_TREAT', version: 'v1', title: 'Consent to Treat', bodyText: 'Text.' })
     );
-    const updated = { firstName: 'Pat' } as MyProfileResponse;
+    const updated = { profileComplete: true } as PatientDetailsResponse;
     acceptConsentSpy.mockReturnValue(of(updated));
     const fixture = TestBed.createComponent(ConsentsSectionComponent);
     fixture.componentInstance.viewDocument(CONSENT_TO_TREAT);
     fixture.componentInstance.signatureForm.setValue({ signatureText: 'Pat Ient' });
-    const emitted: MyProfileResponse[] = [];
+    const emitted: PatientDetailsResponse[] = [];
     fixture.componentInstance.sectionSaved.subscribe((p) => emitted.push(p));
 
     fixture.componentInstance.accept(CONSENT_TO_TREAT);

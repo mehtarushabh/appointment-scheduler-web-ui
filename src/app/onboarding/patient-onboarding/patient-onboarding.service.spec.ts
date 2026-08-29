@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { PatientOnboardingService } from './patient-onboarding.service';
-import { UserOnboardingRequest } from '../../shared/models';
+import { PatientOnboardingRequest } from '../../shared/models';
 
 describe('PatientOnboardingService', () => {
   let service: PatientOnboardingService;
@@ -19,7 +19,7 @@ describe('PatientOnboardingService', () => {
   afterEach(() => httpMock.verify());
 
   it('posts a patient to /api/v1/clinics/me/patients', () => {
-    const request: UserOnboardingRequest = {
+    const request: PatientOnboardingRequest = {
       firstName: 'Pat',
       lastName: 'Ient',
       email: 'pat@example.com',
@@ -44,6 +44,13 @@ describe('PatientOnboardingService', () => {
   it('lists the current clinics for a patient', () => {
     service.listMyClinics().subscribe();
     const req = httpMock.expectOne('/api/v1/me/clinics');
+    expect(req.request.method).toBe('GET');
+    req.flush([]);
+  });
+
+  it("lists the doctors across all of the current patient's clinics", () => {
+    service.listMyDoctors().subscribe();
+    const req = httpMock.expectOne('/api/v1/me/doctors');
     expect(req.request.method).toBe('GET');
     req.flush([]);
   });

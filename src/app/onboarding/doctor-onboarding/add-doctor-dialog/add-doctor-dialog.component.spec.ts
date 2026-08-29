@@ -33,6 +33,7 @@ describe('AddDoctorDialogComponent', () => {
       dateOfBirth: '1988-01-01',
       specialty: 'Cardiology',
       address: { addressLine1: '1 Main St', addressLine2: '', city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
+      biologicalSex: 'FEMALE',
     });
   }
 
@@ -86,7 +87,7 @@ describe('AddDoctorDialogComponent', () => {
 
     fixture.componentInstance.confirm();
 
-    expect(onboardDoctorSpy).toHaveBeenCalledWith(expect.objectContaining({ specialty: 'Cardiology' }));
+    expect(onboardDoctorSpy).toHaveBeenCalledWith(expect.objectContaining({ specialty: 'Cardiology', biologicalSex: 'FEMALE' }));
     expect(notificationServiceStub.success).toHaveBeenCalledWith('Doctor Dana Doc onboarded successfully.');
     expect(dialogRefStub.close).toHaveBeenCalledWith(created);
   });

@@ -1,0 +1,35 @@
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-card-content>
+    <mat-form-field appearance="outline">
+      <mat-label>Specialty</mat-label>
+      <input matInput formControlName="specialty" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Professional Bio</mat-label>
+      <textarea matInput formControlName="professionalBio" rows="4"></textarea>
+      @if (form.controls.professionalBio.hasError('maxlength')) {
+        <mat-error>Professional Bio must be at most 2000 characters.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>NPI Number</mat-label>
+      <input matInput formControlName="npiNumber" />
+      @if (form.controls.npiNumber.hasError('pattern')) {
+        <mat-error>NPI Number must be exactly 10 digits.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>State License Number</mat-label>
+      <input matInput formControlName="stateLicenseNumber" />
+      @if (form.controls.stateLicenseNumber.hasError('maxlength')) {
+        <mat-error>State License Number must be at most 50 characters.</mat-error>
+      }
+    </mat-form-field>
+  </mat-card-content>
+  <mat-card-actions>
+    <button mat-flat-button type="submit" [disabled]="form.invalid">Save professional details</button>
+  </mat-card-actions>
+</form>

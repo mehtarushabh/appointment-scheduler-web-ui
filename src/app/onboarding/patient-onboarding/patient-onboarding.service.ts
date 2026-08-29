@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, throwError } from 'rxjs';
-import { ClinicResponse, PatientOnboardingRequest, PatientProfileView, UserResponse } from '../../shared/models';
+import { ClinicResponse, DoctorSummaryResponse, PatientListResponse, PatientOnboardingRequest, PatientProfileView, UserResponse } from '../../shared/models';
 
 @Injectable({ providedIn: 'root' })
 export class PatientOnboardingService {
@@ -23,9 +23,9 @@ export class PatientOnboardingService {
     return this.http.post<UserResponse>('/api/v1/clinics/me/patients', request);
   }
 
-  /** Clinic Admin or Doctor of their own clinic (Feature 016 FR-024). */
-  listPatients(): Observable<UserResponse[]> {
-    return this.http.get<UserResponse[]>('/api/v1/clinics/me/patients');
+  /** Clinic Admin or Doctor of their own clinic (Feature 016 FR-024). Row fields only (021-user-data-restructuring). */
+  listPatients(): Observable<PatientListResponse[]> {
+    return this.http.get<PatientListResponse[]>('/api/v1/clinics/me/patients');
   }
 
   /** FR-024: a Clinic Admin's or Doctor's read-only view of one patient's whole profile. */
@@ -36,5 +36,10 @@ export class PatientOnboardingService {
   /** The clinics the current authenticated Patient is associated with (FR-013). */
   listMyClinics(): Observable<ClinicResponse[]> {
     return this.http.get<ClinicResponse[]>('/api/v1/me/clinics');
+  }
+
+  /** Feature 019: the distinct doctors across every clinic the current Patient is associated with — options for the Appointments page's Doctor filter. */
+  listMyDoctors(): Observable<DoctorSummaryResponse[]> {
+    return this.http.get<DoctorSummaryResponse[]>('/api/v1/me/doctors');
   }
 }

@@ -2,13 +2,19 @@ import { AddressFormValue } from './address-form/address-form.component';
 
 export type UserRole = 'SYSTEM_ADMIN' | 'CLINIC_ADMIN' | 'DOCTOR' | 'PATIENT';
 
-/** Mirrors UserOnboardingRequest in contracts/onboarding-api.yaml (shared by every onboarding flow). */
+/**
+ * Mirrors UserOnboardingRequest in contracts/onboarding-api.yaml (shared by every onboarding flow
+ * that creates a Doctor or Clinic Admin account). biologicalSex required
+ * (022-role-details-endpoints, research.md #2) — Patient onboarding uses its own, separate
+ * PatientOnboardingRequest and is unaffected.
+ */
 export interface UserOnboardingRequest {
   firstName: string;
   lastName: string;
   email: string;
   dateOfBirth: string;
   address: AddressFormValue;
+  biologicalSex: BiologicalSex;
 }
 
 export interface DoctorOnboardingRequest extends UserOnboardingRequest {
@@ -36,7 +42,12 @@ export interface PatientOnboardingRequest {
   address?: AddressFormValue | null;
 }
 
-/** Mirrors UserResponse in contracts/onboarding-api.yaml, extended with Feature 016's Section 1 fields. */
+/**
+ * Mirrors UserResponse in contracts/onboarding-api.yaml. 021-user-data-restructuring:
+ * biologicalSex/personalPhone removed (research.md #6) — a direct consequence of the backend User
+ * entity losing those fields to PatientDetails, not a User Story 2 decision; they're still served
+ * on MyProfileResponse below.
+ */
 export interface UserResponse {
   id: string;
   firstName: string;
@@ -47,8 +58,6 @@ export interface UserResponse {
   role: UserRole;
   clinicId: string | null;
   specialty: string | null;
-  biologicalSex: BiologicalSex | null;
-  personalPhone: string | null;
 }
 
 /** Mirrors DoctorProfileDetails in contracts/patient-profile-api.yaml — Doctor-only, unchanged from Feature 011. */
@@ -125,11 +134,12 @@ export interface SectionCompletionStatus {
 }
 
 /**
- * Mirrors MyProfileResponse in contracts/patient-profile-api.yaml — the caller's own full profile,
- * every section in one combined read (research.md #16), deliberately kept separate from MeResponse
- * (Feature 011 research.md #1). doctorDetails/insurance/emergencyContact/clinicalHistory/
- * consentStatuses/sectionStatus are present only for their own role, null (or omitted) for every
- * other role.
+ * Mirrors MyProfileResponse in contracts/role-details-endpoints-api.yaml — the caller's own
+ * Section 1 (Basic Information), deliberately kept separate from MeResponse (Feature 011
+ * research.md #1). 021-user-data-restructuring narrowed this away from Insurance/Emergency
+ * Contact/Clinical History/Consents; 022-role-details-endpoints narrowed it further —
+ * personalPhone/doctorDetails moved to PatientDetailsResponse/DoctorDetailsResponse — and added
+ * profileComplete (research.md #4), true unconditionally for every non-Patient role.
  */
 export interface MyProfileResponse {
   firstName: string;
@@ -138,25 +148,80 @@ export interface MyProfileResponse {
   dateOfBirth: string;
   address: AddressFormValue;
   biologicalSex: BiologicalSex | null;
-  personalPhone: string | null;
-  doctorDetails: DoctorProfileDetails | null;
+  profileComplete: boolean;
+  /** null until the user's first successful upload (024-profile-photo-upload). */
+  profilePhotoUrl: string | null;
+}
+
+/** POST /me/profile-photo response (024-profile-photo-upload). */
+export interface UploadProfilePhotoResponse {
+  profilePhotoUrl: string;
+}
+
+/** GET/PATCH /me/preferences response (026-user-preferences). defaultLandingPage is a real route path, e.g. "/appointments" — "/home" is the default. */
+export interface UserPreferencesResponse {
+  defaultLandingPage: string;
+}
+
+/** PATCH /me/preferences request body (026-user-preferences). Whole-section replace. */
+export interface UpdateUserPreferencesRequest {
+  defaultLandingPage: string;
+}
+
+/**
+ * Mirrors PatientDetailsResponse in contracts/role-details-endpoints-api.yaml
+ * (021-user-data-restructuring) — GET /me/patient-details: exactly the fields MyProfileResponse
+ * lost above. Patient only. 022-role-details-endpoints: gains personalPhone, moved here from
+ * MyProfileResponse the same way Insurance/Emergency Contact/Clinical History/Consents already did.
+ */
+export interface PatientDetailsResponse {
   insurance: InsuranceDetails | null;
   emergencyContact: EmergencyContactDetails | null;
   clinicalHistory: ClinicalHistoryDetails | null;
   consentStatuses: ConsentDocumentStatus[];
+  personalPhone: string | null;
   profileComplete: boolean;
   sectionStatus: SectionCompletionStatus | null;
 }
 
-/** Mirrors UpdateMyProfileRequest in contracts/patient-profile-api.yaml — Section 1 + doctorDetails only (research.md #16). */
+/** Whole-field replace (022-role-details-endpoints) — personal phone doesn't fit any of PatientDetailsResponse's four sections, so it gets its own small write. */
+export interface UpdatePersonalPhoneRequest {
+  personalPhone: string | null;
+}
+
+/**
+ * Mirrors DoctorDetailsResponse in contracts/role-details-endpoints-api.yaml
+ * (022-role-details-endpoints) — GET /me/doctor-details: a Doctor's own specialty, moved off
+ * MyProfileResponse's doctorDetails onto its own independently-saved endpoint.
+ */
+export interface DoctorDetailsResponse {
+  specialty: string;
+  professionalBio: string | null;
+  npiNumber: string | null;
+  stateLicenseNumber: string | null;
+}
+
+/** Whole-section replace (022-role-details-endpoints; 023-doctor-professional-details adds the three optional fields below). */
+export interface UpdateDoctorDetailsRequest {
+  specialty: string;
+  professionalBio: string | null;
+  npiNumber: string | null;
+  stateLicenseNumber: string | null;
+}
+
+/** Mirrors ClinicAdminDetailsResponse in contracts/role-details-endpoints-api.yaml (022-role-details-endpoints) — intentionally empty today, no Clinic-Admin-specific fields exist yet (research.md #6). */
+export type ClinicAdminDetailsResponse = Record<string, never>;
+
+/** Mirrors SystemAdminDetailsResponse in contracts/role-details-endpoints-api.yaml (022-role-details-endpoints) — same situation as ClinicAdminDetailsResponse. */
+export type SystemAdminDetailsResponse = Record<string, never>;
+
+/** Mirrors UpdateMyProfileRequest in contracts/role-details-endpoints-api.yaml — Section 1 only (research.md #16 of feature 016; 022-role-details-endpoints removed personalPhone/doctorDetails). biologicalSex is accepted for every role now, not Patient-conditional. */
 export interface UpdateMyProfileRequest {
   firstName: string;
   lastName: string;
   dateOfBirth: string;
   address: AddressFormValue;
   biologicalSex: BiologicalSex | null;
-  personalPhone: string | null;
-  doctorDetails: DoctorProfileDetails | null;
 }
 
 /** Mirrors UpdateInsuranceRequest in contracts/patient-profile-api.yaml — whole-section replace (FR-014, FR-012). */
@@ -261,6 +326,28 @@ export interface DoctorSummaryResponse {
   specialty: string;
 }
 
+/**
+ * Mirrors DoctorListResponse in contracts/user-data-restructuring-api.yaml (021-user-data-restructuring,
+ * research.md #5) — GET /clinics/me/doctors's row fields only; the expanded row fetches the rest via
+ * GET /clinics/me/doctors/{doctorId}/profile (UserResponse). A separate type from
+ * DoctorSummaryResponse, whose two other consumers stay deliberately minimal without email.
+ */
+export interface DoctorListResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  specialty: string;
+  email: string;
+}
+
+/** Mirrors PatientListResponse in contracts/user-data-restructuring-api.yaml (021-user-data-restructuring, research.md #5) — GET /clinics/me/patients's row fields only. */
+export interface PatientListResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export interface AvailableSlotsResponse {
   date: string;
   durationMinutes: number;
@@ -278,21 +365,39 @@ export interface BookAppointmentRequest {
 export type AppointmentState = 'SCHEDULED' | 'CANCELLED' | 'COMPLETED';
 
 /**
- * Mirrors AppointmentCriteria in contracts/appointment-search-api.yaml (Feature 013). Every field
- * is optional — an absent field means "no restriction on this dimension" — combined with, never
- * widening, the caller's own scope (data-model.md).
+ * Mirrors AppointmentCriteria in contracts/appointment-filters-api.yaml (Feature 013, extended by
+ * Feature 019's doctorIds/patientIds). Every field is optional — an absent field means "no
+ * restriction on this dimension" — combined with, never widening, the caller's own scope
+ * (data-model.md).
  */
 export interface AppointmentCriteria {
   states?: AppointmentState[] | null;
   dateOnOrAfter?: string | null;
   dateOnOrBefore?: string | null;
+  doctorIds?: string[] | null;
+  patientIds?: string[] | null;
 }
 
-/** Mirrors AppointmentSearchRequest in contracts/appointment-search-api.yaml. */
+/**
+ * One value per logical sort dimension shown in the Appointments table, not one per column —
+ * 'DATE_TIME' is deliberately the single value for both the Date and the Time column (Feature 020,
+ * research.md #3); the caller sends 'DATE_TIME' regardless of which of the two was clicked.
+ */
+export type AppointmentSortField = 'PATIENT_NAME' | 'DOCTOR_NAME' | 'DATE_TIME' | 'STATUS';
+
+/**
+ * Mirrors AppointmentSearchRequest in contracts/appointment-sorting-api.yaml (Feature 013,
+ * extended by Feature 019's criteria fields and Feature 020's sortBy/sortDirection). sortBy/
+ * sortDirection are siblings of criteria, not part of it — a sort is not a filter (data-model.md).
+ * An absent sortBy means the existing default order (date, then time, ascending); an absent
+ * sortDirection with a present sortBy means ascending.
+ */
 export interface AppointmentSearchRequest {
   criteria?: AppointmentCriteria | null;
   page: number;
   size: number;
+  sortBy?: AppointmentSortField | null;
+  sortDirection?: 'ASC' | 'DESC' | null;
 }
 
 /**

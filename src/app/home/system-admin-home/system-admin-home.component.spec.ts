@@ -20,8 +20,6 @@ function clinic(overrides: Partial<ClinicResponse>): ClinicResponse {
       role: 'CLINIC_ADMIN',
       clinicId: '1',
       specialty: null,
-      biologicalSex: null,
-      personalPhone: null,
     },
     ...overrides,
   };

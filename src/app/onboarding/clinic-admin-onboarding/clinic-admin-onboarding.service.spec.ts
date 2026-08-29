@@ -25,6 +25,7 @@ describe('ClinicAdminOnboardingService', () => {
       email: 'second@example.com',
       dateOfBirth: '1990-01-01',
       address: { addressLine1: '1 Main St', addressLine2: null, city: 'Metropolis', state: 'NY', zip: '10001', country: 'USA' },
+      biologicalSex: 'FEMALE',
     };
 
     service.onboardClinicAdmin(request).subscribe();

@@ -26,18 +26,22 @@
 
         <ng-container matColumnDef="expandedDetail">
           <td mat-cell *matCellDef="let doctor" [attr.colspan]="displayedColumns.length">
-            <div>
-              <p>Email: {{ doctor.email }}</p>
-              <p>Date of birth: {{ doctor.dateOfBirth }}</p>
-              <p>Specialty: {{ doctor.specialty }}</p>
-              <p>
-                {{ doctor.address.addressLine1 }}
-                @if (doctor.address.addressLine2) {
-                  , {{ doctor.address.addressLine2 }}
-                }
-                , {{ doctor.address.city }}, {{ doctor.address.state }} {{ doctor.address.zip }}, {{ doctor.address.country }}
-              </p>
-            </div>
+            @if (profileFor(doctor); as profile) {
+              <div>
+                <p>Email: {{ profile.email }}</p>
+                <p>Date of birth: {{ profile.dateOfBirth }}</p>
+                <p>Specialty: {{ profile.specialty }}</p>
+                <p>
+                  {{ profile.address.addressLine1 }}
+                  @if (profile.address.addressLine2) {
+                    , {{ profile.address.addressLine2 }}
+                  }
+                  , {{ profile.address.city }}, {{ profile.address.state }} {{ profile.address.zip }}, {{ profile.address.country }}
+                </p>
+              </div>
+            } @else {
+              <p>Loading...</p>
+            }
           </td>
         </ng-container>
 
